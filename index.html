@@ -2424,26 +2424,34 @@ ${lines}
 [교사가 고른 핵심 개념] ${picked.join(", ") || "-"}
 [뽑혔지만 고르지 않은 개념] ${rest.join(", ") || "-"}` };
 }
-const XP_RULES = `- 기존 개념에서 충분히 드러나지 않은 의미나 관점을 탐색합니다.
-- 사고 관점(본질, 구성, 관계, 원인과 영향, 변화, 관점, 확장) 가운데 지금 알맞은 하나를 골라 묻습니다. 이미 쓴 관점은 되도록 피합니다.
-- 어느 교과에도 쓸 수 있는 열린 질문 틀이되, 이 단원의 학습 내용(성취기준·내용 요소·개념 이름)을 넣어 구체화합니다. 예/아니오로 답하는 질문은 쓰지 않습니다.
-- 쉬운 말로 한 문장, 질문은 하나만. 특정 개념을 정답으로 유도하지 않습니다.`;
-/* 규칙 예시: 관점별 질문 틀 */
+const XP_RULES = `- 목표: 선택된 성취기준, 추출된 학습 요소(내용 요소), 기존 개념을 분석해 '아직 발견되지 않은 개념'을 교사가 스스로 찾아내도록 돕습니다.
+- 이미 있는 개념의 뜻을 되묻는 질문이 아니라, 학습 내용을 새로운 관점에서 바라보게 해 기존 개념 목록 밖의 개념이 떠오르게 하는 질문을 합니다.
+- 사고 관점(본질, 구성, 관계, 원인과 영향, 변화, 관점, 확장) 가운데 기존 개념이 덜 비추는 쪽 하나를 골라 묻습니다. 이미 쓴 관점은 되도록 피합니다.
+- 질문의 틀은 어느 교과에나 쓸 수 있는 열린 질문이되, 이 단원의 학습 내용(성취기준·내용 요소의 표현)을 넣어 구체화합니다. 예/아니오 질문은 쓰지 않습니다.
+- 쉬운 말로 한 문장, 한 번에 질문은 하나만. 특정 개념을 정답으로 유도하지 않습니다.`;
+/* 규칙 예시: 교과와 관계없는 관점별 질문 틀 — x에는 학습 내용(내용 요소 표현)이 들어가요 */
 const XP_TPL = {
-  "본질":       (x)=>`학생에게 '${x}'의 뜻을 한마디로 설명한다면, 무엇이라고 하시겠어요?`,
-  "구성":       (x)=>`'${x}' 안에는 어떤 요소들이 들어 있다고 볼 수 있을까요?`,
-  "관계":       (x,y)=>y ? `'${x}', '${y}' 두 개념은 이 단원에서 서로 어떻게 이어질까요?` : `'${x}'${jos(x,"은","는").slice(x.length)} 이 단원의 다른 내용과 어떻게 이어질까요?`,
-  "원인과 영향": (x)=>`'${x}' 때문에 생기는 일, 또는 '${x}'에 영향을 주는 것은 무엇일까요?`,
-  "변화":       (x)=>`시간이 지나거나 상황이 바뀌면, '${x}'에서는 무엇이 달라질까요?`,
-  "관점":       (x)=>`'${x}'${jos(x,"을","를").slice(x.length)} 만드는 사람과 쓰는 사람은 각각 무엇을 중요하게 볼까요?`,
-  "확장":       (x)=>`학생이 교실 밖 생활에서 '${x}'${jos(x,"과","와").slice(x.length)} 관련된 장면을 만나는 때는 언제일까요?`,
+  "본질":       (x)=>`학생이 '${x}'${jos(x,"을","를").slice(x.length)} 정말 이해했다면, 무엇을 설명할 수 있어야 할까요?`,
+  "구성":       (x)=>`'${x}'${jos(x,"은","는").slice(x.length)} 어떤 부분이나 요소들로 이루어져 있을까요?`,
+  "관계":       (x)=>`'${x}'${jos(x,"은","는").slice(x.length)} 학생의 삶이나 다른 무엇과 어떻게 이어져 있을까요?`,
+  "원인과 영향": (x)=>`'${x}'${jos(x,"이","가").slice(x.length)} 달라지면, 무엇이 함께 달라질까요?`,
+  "변화":       (x)=>`'${x}'${jos(x,"은","는").slice(x.length)} 예전과 지금, 그리고 앞으로 어떻게 달라질까요?`,
+  "관점":       (x)=>`'${x}'${jos(x,"을","를").slice(x.length)} 누구의 입장에서 보느냐에 따라 무엇이 다르게 보일까요?`,
+  "확장":       (x)=>`'${x}'${jos(x,"을","를").slice(x.length)} 배운 학생이 이 단원 밖에서 다시 만나게 될 문제는 무엇일까요?`,
 };
+/* 질문에 넣을 학습 내용: 내용 요소 가운데 고른 개념이 덜 드러난 것부터 */
+function xpTargets(){
+  const S = sel(), ce = S.ce || {}, { picked } = xpContext();
+  const items = [...(ce.k||[]).map(x=>x.text), ...(ce.s||[]).map(x=>x.text.replace(/\s*(하기|하고|한다)$/,""))].filter(Boolean);
+  const hit = t => picked.filter(p=>t.includes(p)).length;
+  return [...new Set(items)].sort((a,b)=>hit(a)-hit(b));
+}
 function xpQuestionExample(focus){
-  const xp = xpOf(), { picked, rest } = xpContext();
+  const xp = xpOf();
   const lens = XP_LENS.find(l=>!xp.used.includes(l)) || XP_LENS[xp.used.length % XP_LENS.length];
-  const pool = [...picked, ...rest]; const x = focus || pool[xp.used.length % Math.max(1,pool.length)] || curArea().name;
-  const y = pool.find(p=>p!==x);
-  return { lens, q: XP_TPL[lens](x, y) };
+  const tg = xpTargets(), asked = xp.msgs.filter(m=>m.q).length;
+  const x = focus || tg[asked % Math.max(1,tg.length)] || curArea().name;
+  return { lens, q: XP_TPL[lens](x) };
 }
 /* 교사 답에서 개념 후보 뽑기 (규칙 예시) */
 function xpCandsExample(answer){
@@ -2453,12 +2461,13 @@ function xpCandsExample(answer){
     .filter((w,i,arr)=>!arr.slice(0,i).some(l=>l.includes(w)));
   answer.split(/[\s,.!?·]+/).map(t=>t.replace(/(이라는|라는|이나|이고|이며|이에요|예요|이다|으로|에서|에게|까지|부터|처럼|하고|과|와|은|는|이|가|을|를|의|도|만|로|에)$/,""))
     .filter(t=>t.length>=3 && isCore(t) && !found.includes(t)).forEach(t=>found.push(t));
-  const dup = found.filter(w=>have.includes(w)), cands = found.filter(w=>!have.includes(w)).slice(0,2);
+  const same = w => have.find(h=>h===w || (h.length>=2 && w.length>=2 && (h.includes(w) || w.includes(h))));   // 같거나 겹치는 기존 개념
+  const dup = [...new Set(found.map(same).filter(Boolean))], cands = found.filter(w=>!same(w)).slice(0,2);
   return { cands, dup:dup.slice(0,3) };
 }
 async function getXpFirst(){
   const c = xpContext();
-  return viaAI("핵심 개념 탐색 질문", `교사가 핵심 개념의 추가 탐색을 요청했습니다. 아래 성취기준, 내용 요소, 지금까지의 개념을 종합적으로 분석해 첫 질문 하나를 만드세요.
+  return viaAI("핵심 개념 탐색 질문", `교사가 핵심 개념의 추가 탐색을 요청했습니다. 아래 선택된 성취기준, 추출된 학습 요소, 기존 개념을 분석해, 아직 발견되지 않은 개념을 탐색할 수 있는 첫 질문 하나를 만드세요.
 ${c.text}
 ${XP_RULES}
 JSON 하나만 답하세요: {"lens":"본질|구성|관계|원인과 영향|변화|관점|확장","q":"질문 한 문장"}`,
@@ -2474,10 +2483,10 @@ ${c.text}
 ${talk}
 [교사의 새 답] ${answer}
 
-1) 교사의 답에서 핵심 개념 후보(명사 낱말)를 뽑습니다. 답에 실제로 드러난 것만, 0~2개. 불필요하게 늘리지 않습니다.
+1) 교사의 답에서 핵심 개념 후보(명사 낱말)를 발견해 제안합니다. 답에 실제로 드러난 것만, 0~2개. 불필요하게 늘리지 않습니다.
 2) 후보가 이미 있는 개념([교사가 고른 핵심 개념], [뽑혔지만 고르지 않은 개념])과 같거나 뜻이 겹치면 cands가 아니라 dup에 그 기존 개념 이름을 적습니다.
 3) say: 교사의 답을 받아 한두 문장으로 짧게 정리하고, 후보가 있으면 더할지 가볍게 제안합니다 (강요하지 않음).
-4) q: 교사의 답을 이어받는 후속 질문 하나. 이미 쓴 관점(${xp.used.join(", ")||"-"})은 되도록 피합니다.
+4) q: 교사의 답을 이어받아, 아직 발견되지 않은 개념을 더 탐색하게 하는 후속 질문 하나. 이미 쓴 관점(${xp.used.join(", ")||"-"})은 되도록 피합니다.
 ${XP_RULES}
 JSON 하나만 답하세요: {"cands":["..."],"dup":["..."],"say":"...","lens":"...","q":"..."}`,
     r => r && (r.q || r.say) ? { cands:(r.cands||[]).map(String).filter(Boolean).slice(0,2), dup:(r.dup||[]).map(String).filter(Boolean).slice(0,3), say:String(r.say||""), lens: XP_LENS.includes(r.lens) ? r.lens : "", q:String(r.q||"") } : null,
