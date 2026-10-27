@@ -894,7 +894,7 @@ body{background-color:var(--bg);background-image:radial-gradient(at 0% 0%,rgba(2
 .le-sum{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:4px 0 10px}
 .le-sum b{color:var(--ink)} .le-sum .sp{flex:1}
 .le-ok{color:var(--done);font-weight:700} .le-miss{color:var(--focus);font-weight:700}
-.le-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.le-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px;align-items:start}
 .le-group{border:1px solid #EDE7F8;border-radius:22px;background:var(--surface);padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px}
 .le-gh{display:flex;align-items:center;gap:8px}
 .le-gn{display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;background:var(--grad);color:#fff;font-size:12px;font-weight:800}
@@ -902,8 +902,18 @@ body{background-color:var(--bg);background-image:radial-gradient(at 0% 0%,rgba(2
 .le-gname:hover{border-color:var(--line)} .le-gname:focus{outline:none;border-color:#A78BFA;background:var(--surface)}
 .le-gname:empty::before{content:attr(data-ph);color:var(--faint)}
 .le-cnt{font-size:11.5px;color:var(--faint);white-space:nowrap}
-.le-items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.le-item{display:flex;gap:6px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);padding:7px 4px 7px 10px}
+.le-items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.le-cat{border-radius:14px;padding:6px 8px 8px;border:1px solid transparent}
+.le-cat.k{background:color-mix(in srgb,var(--k) 5%,var(--surface));border-color:color-mix(in srgb,var(--k) 18%,transparent)}
+.le-cat.s{background:color-mix(in srgb,var(--s) 5%,var(--surface));border-color:color-mix(in srgb,var(--s) 18%,transparent)}
+.le-cat.v{background:color-mix(in srgb,var(--v) 5%,var(--surface));border-color:color-mix(in srgb,var(--v) 18%,transparent)}
+.le-ch{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;margin:0 0 5px 2px}
+.le-cat.k .le-ch{color:var(--k)} .le-cat.s .le-ch{color:var(--s)} .le-cat.v .le-ch{color:var(--v)}
+.le-ch span{font-weight:600;color:var(--faint)}
+.le-add input{width:100%;margin-top:5px;border:1px dashed var(--line);border-radius:999px;padding:4px 12px;font:inherit;font-size:12px;background:transparent;color:var(--ink)}
+.le-add input:focus{outline:none;border-style:solid;border-color:var(--accent-line);background:var(--surface)}
+.le-sc{font-weight:700} .le-sc.k{color:var(--k)} .le-sc.s{color:var(--s)} .le-sc.v{color:var(--v)}
+.le-item{display:flex;gap:6px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:6px 4px 6px 10px}
 .le-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
 .le-text{font-size:13.5px;line-height:1.55;border:1px solid transparent;border-radius:8px;padding:1px 4px;margin-left:-4px;cursor:text;white-space:pre-wrap}
 .le-text:hover{border-color:var(--line);background:var(--surface)} .le-text:focus{outline:none;border-color:#A78BFA;background:var(--surface)}
@@ -1716,134 +1726,154 @@ function ceItemHtml(cat, it, i){
     </div><button class="ce-del" type="button" data-cedel="${cat}" data-ceid="${it.id}" aria-label="삭제">×</button></li>`;
 }
 /* =====================================================================
-   (테스트) 성취기준 분석 · 학습 요소 추출과 유목화
-   · 요소 추출: 성취기준마다 학습 내용과 수행 요구를 '내용 + 반응지시어(~하기)'로 나눠 뽑아요.
-   · 유목화: 학습 내용과 개념적 연관성을 중심으로 묶고 유목명을 붙여요. (반응지시어가 같다는 이유만으로 묶지 않아요)
+   (테스트) 성취기준 분석 · 학습 요소 추출과 유목화 → 결과는 지식·이해 / 과정·기능 / 가치·태도 형식
+   · 요소 추출: 성취기준마다 학습 내용과 수행 요구를 나눠 뽑고, 각 요소를 범주로 나눠요.
+       지식·이해(k) = 내용 (핵심 개념·원리·사실·이론, 명사구)
+       과정·기능(s) = 내용 + 반응지시어(~하기) (방법·사고 작용·절차·기술)
+       가치·태도(v) = 성취기준에 담긴 태도·가치·인식 (명사구)
+   · 유목화: 학습 내용과 개념적 연관성을 중심으로 묶고 유목명을 붙여요. 한 유목 안에 세 범주가 함께 들어가요.
+     (반응지시어가 같다는 이유만으로 묶지 않아요)
    · 원칙: 성취기준의 의미와 수행 수준을 지키고, 임의로 더하거나 빼지 않아요.
-   · 결과는 유목별 요소 + 출처 성취기준. 교사가 요소·유목명을 고치고 다른 유목으로 옮길 수 있어요.
-   · 뒤 단계에는 유목명을 '지식·이해', 요소를 '과정·기능'으로 넘겨요.
+   · 교사가 요소·유목명을 고치고, 다른 유목·범주로 옮길 수 있어요. 뒤 단계에는 세 범주가 그대로 넘어가요.
    ▼ API 연결 지점: getLearningElements(stds)
    ===================================================================== */
 const leui = { confirm:false };
 const leOf = () => sel().le;
-/* 성취기준 문장 → '내용 + ~하기' 요소들 (AI 없을 때) */
+const LE_CATS = [["k","지식·이해"],["s","과정·기능"],["v","가치·태도"]];
+const LE_K_VERB = /^(이해하기|알기|파악하기|아는|이해)/;
+const LE_V_VERB = /^(인식하기|갖기|기르기|존중하기|가지기)$/;
+/* 성취기준 문장 → 절(내용 + 반응지시어) → 범주별 요소 (AI 없을 때) */
 function leSplitStd(text){
   let t = String(text).replace(/\s+/g," ").trim().replace(/[.。]$/,"");
   t = t.replace(/(하고|하며|하여|함으로써|하여서|해서|하고자|하면서)\s*,?\s*/g, "하기|").replace(/한다$/,"하기").replace(/(갖는다|가진다)$/,"갖기").replace(/(갖고|가지고)\s*,?\s*/g,"갖기|");
-  const out = []; let prev = "";
+  const clauses = []; let prev = "";
   t.split("|").map(c=>c.trim().replace(/^,\s*/,"")).filter(c=>c.length >= 3).forEach(c=>{
-    if (prev) c = c.replace(/^이와\s+관련된/, `${josa(prev,"과","와")} 관련된`).replace(/^이를\s+/, `${josa(prev,"을","를")} `);   // '이와 관련된' → 앞 내용으로
-    const m = c.match(/^(.*)(?:을|를)\s+([^을를]+)$/);   // 마지막 '을/를' 앞이 내용, 뒤가 반응지시어
-    if (m){ const content = m[1].trim(); prev = content; out.push({ content, verb:m[2].trim(), text:`${content} ${m[2].trim()}` }); return; }
+    if (prev) c = c.replace(/^이와\s+관련된/, `${josa(prev,"과","와")} 관련된`).replace(/^이를\s+/, `${josa(prev,"을","를")} `);
+    const m = c.match(/^(.*)(?:을|를)\s+([^을를]+)$/);
+    if (m){ prev = m[1].trim(); clauses.push({ content:prev, verb:m[2].trim() }); return; }
     const verb = (c.match(/(\S+하기|\S+갖기)$/)||[])[1] || "", content = c.replace(/\s*\S+(하기|갖기)$/,"").trim();
-    if (!content && prev){ out.push({ content:prev, verb, text:`${prev} ${verb}` }); return; }   // '~하여 평가한다'처럼 내용이 앞 절에 있으면 이어 받아요
+    if (!content && prev){ clauses.push({ content:prev, verb }); return; }
     if (content) prev = content;
-    out.push({ content, verb, text:c });
+    clauses.push({ content, verb });
   });
+  const out = [];
+  clauses.forEach(({ content, verb })=>{
+    if (!content) return;
+    if (LE_K_VERB.test(verb)) out.push({ cat:"k", text:content, content });                       // ~을 이해한다 → 지식·이해
+    else if (LE_V_VERB.test(verb) || /(태도|자세|가치관|감수성|자신감)$/.test(content)) out.push({ cat:"v", text: verb==="인식하기" ? `${content} 인식` : content, content });   // 태도·인식 → 가치·태도
+    else out.push({ cat:"s", text:`${content} ${verb}`.trim(), content });               // 그 밖의 수행 → 과정·기능
+  });
+  // 지식·이해가 없는 성취기준은 수행의 대상(내용)을 지식·이해로 담아요 (성취기준 안의 내용이라 새로 더한 것이 아니에요)
+  if (!out.some(e=>e.cat==="k")){ const s0 = out.find(e=>e.cat==="s" && e.content); if (s0) out.unshift({ cat:"k", text:s0.content, content:s0.content }); }
   return out;
 }
-const LE_GENERIC = new Set(["기술","문제","방법","사례","활동","내용","과정","중요성","특징","종류","특성","개념","의미","영향","관계","원리","다양한","여러","가지"]);
+const LE_GENERIC = new Set(["기술","문제","방법","사례","활동","내용","과정","중요성","특징","종류","특성","개념","의미","영향","관계","원리","다양한","여러","가지","태도","인식","자세","방안","해결","관련","실천","주어진","조건","요구","바람직한","위해"]);
 function leKeyWords(content){
-  const ws = (String(content).match(/[가-힣A-Za-z]{2,}/g) || []).map(w=>w.replace(/(의|과|와|을|를|에|및|등|으로|로)$/,"")).filter(w=>w.length>=2);
+  const ws = (String(content).match(/[가-힣A-Za-z]{2,}/g) || []).map(w=>w.replace(/(의|과|와|을|를|에|및|등|으로|로|하기)$/,"")).filter(w=>w.length>=2);
   return ws.filter(w=>!LE_GENERIC.has(w) && !/(된|한|적|는|은|할|인|운)$/.test(w));
 }
 const leOverlap = (a, b) => a === b || (a.length >= 2 && b.length >= 2 && (a.startsWith(b) || b.startsWith(a)));
 function learningElementsExample(stds){
   const els = [];
   stds.forEach(([n, t])=>leSplitStd(t).forEach(e=>els.push({ ...e, code:n })));
-  // 내용의 핵심 낱말이 겹치면 같은 유목 (반응지시어는 보지 않아요)
   const groups = [];
   els.forEach(e=>{
-    const kw = leKeyWords(e.content);
+    const kw = leKeyWords(e.content || e.text);   // 반응지시어는 빼고 '내용'으로만 묶어요
     let best = null, bestN = 0;
     groups.forEach(g=>{ const n = kw.filter(w=>[...g.kw].some(x=>leOverlap(w, x))).length; if (n > bestN){ best = g; bestN = n; } });
-    if (best && bestN >= 1){ best.items.push(e); kw.forEach(w=>best.kw.add(w)); best.cnt = best.cnt || {}; kw.forEach(w=>best.cnt[w] = (best.cnt[w]||0)+1); }
-    else { const g = { kw:new Set(kw), cnt:{}, items:[e] }; kw.forEach(w=>g.cnt[w] = 1); groups.push(g); }
+    if (best){ best.items.push(e); kw.forEach(w=>best.kw.add(w)); }
+    else groups.push({ kw:new Set(kw), items:[e] });
   });
   return { groups: groups.map(g=>{
-    // 유목명: 묶인 요소들의 내용에서 가장 자주 나오는 개념 명사(구)
-    const cnt = {}; g.items.forEach(e=>{ let ws = []; try { ws = conceptWords(e.content); } catch(_){} (ws.length ? ws : leKeyWords(e.content)).forEach(w=>{ cnt[w] = (cnt[w]||0) + 1; }); });
-    const top = Object.entries(cnt).filter(([w])=>!LE_GENERIC.has(w)).sort((a,b)=>b[1]-a[1] || a[0].length-b[0].length).map(x=>x[0]);
-    const name = top[0] || (g.items[0].content.slice(0, 16) || "유목");
-    return { name, items: g.items.map(e=>({ text:e.text, code:e.code })) };
+    // 유목명: 지식·이해 요소에서 나온 개념 가운데, 묶인 요소에 가장 많이 들어 있는 것 (같으면 둘을 ·로)
+    const src = g.items.filter(e=>e.cat==="k").concat(g.items.filter(e=>e.cat!=="k"));
+    const cands = new Set(); src.forEach(e=>{ let ws = []; try { ws = conceptWords(e.text); } catch(_){} (ws.length ? ws : leKeyWords(e.text)).forEach(w=>{ if (!LE_GENERIC.has(w) && w.length >= 2) cands.add(w); }); });
+    const scored = [...cands].map(w=>({ w, n: g.items.filter(e=>(e.content || e.text).includes(w)).length })).sort((a,b)=>b.n-a.n || a.w.length-b.w.length);
+    const best = scored.length ? scored.filter(x=>x.n===scored[0].n).slice(0, 2).map(x=>x.w) : [];
+    return { name: best.length ? best.join("·") : (g.items[0].text.slice(0, 16) || "유목"), items: g.items };
   }) };
 }
 function buildLEPrompt(stds){
   return `당신은 2022 개정 교육과정에 따라 수업을 설계하는 중학교 교사를 돕습니다.
-선택한 성취기준을 분석하여 학습 요소를 추출하고 유목화하세요.
+선택한 성취기준을 분석하여 학습 요소를 추출하고 유목화하세요. 결과는 지식·이해, 과정·기능, 가치·태도 형식으로 정리합니다.
 
 [고른 성취기준]
 ${stds.map(([n,t])=>`[${fullCode(n)}] ${t}`).join("\n")}
 
-1. 요소 추출: 각 성취기준에 포함된 학습 내용과 수행 요구를 '내용 + 반응지시어(~하기)' 형태로 분리하여 추출합니다.
-   예) "건설 구조물의 종류와 특성 이해하기", "건설 구조물의 혁신사례 탐구하기"
-2. 유목화: 추출된 요소를 학습 내용과 개념적 연관성을 중심으로 묶고, 각 유목에 적절한 명칭(명사구)을 붙입니다.
-3. 원칙: 성취기준의 의미와 수행 수준을 유지하며, 임의로 내용을 추가하거나 누락하지 않습니다. 반응지시어가 같다는 이유만으로 유목화하지 않습니다. 모든 성취기준의 모든 학습 내용·수행 요구가 빠짐없이 한 번 이상 들어가야 합니다.
-4. 결과: 유목별 추출 요소와 출처 성취기준 코드를 제시합니다.
-JSON 하나만 답하세요: {"groups":[{"name":"유목명","items":[{"text":"내용 ~하기","code":"${fullCode(stds[0] ? stds[0][0] : "01-01")}"}]}]}`;
+1. 요소 추출: 각 성취기준에 포함된 학습 내용과 수행 요구를 '내용 + 반응지시어(~하기)' 형태로 분리하고, 각 요소를 범주(cat)로 나눕니다.
+   - k 지식·이해: 학습 내용 그 자체(핵심 개념·원리·사실·이론)를 명사구로. 예) "건설 구조물의 종류와 특성"
+   - s 과정·기능: 내용 + 반응지시어(~하기). 방법·사고 작용·절차·기술. 예) "건설 구조물의 혁신사례 탐구하기"
+   - v 가치·태도: 성취기준에 담긴 태도·성향·가치관·인식을 명사구로. 예) "건설기술의 중요성 인식"
+2. 유목화: 추출된 요소를 학습 내용과 개념적 연관성을 중심으로 묶고, 각 유목에 적절한 명칭(명사구)을 붙입니다. 한 유목 안에 k·s·v가 함께 들어갈 수 있습니다.
+3. 원칙: 성취기준의 의미와 수행 수준을 유지하며, 임의로 내용을 추가하거나 누락하지 않습니다. 반응지시어가 같다는 이유만으로 유목화하지 않습니다. 모든 성취기준이 빠짐없이 반영되어야 합니다.
+4. 결과: 유목별 추출 요소(범주 포함)와 출처 성취기준 코드를 제시합니다.
+JSON 하나만 답하세요: {"groups":[{"name":"유목명","items":[{"cat":"k","text":"...","code":"${fullCode(stds[0] ? stds[0][0] : "01-01")}"},{"cat":"s","text":"... 하기","code":"..."}]}]}`;
 }
 async function getLearningElements(stds){
-  const prefix = cur().prefix, codes = stds.map(s=>s[0]);
+  const prefix = cur().prefix;
   return viaAI("학습 요소 추출·유목화", buildLEPrompt(stds),
     r => r && Array.isArray(r.groups) && r.groups.length ? { groups: r.groups.map(g=>({ name:String(g.name||"").trim() || "유목",
-      items:(Array.isArray(g.items) ? g.items : []).map(it=>({ text:String(it.text||it||"").trim(), code:String(it.code||"").replace(/[\[\]\s]/g,"").replace(prefix,"") })).filter(it=>it.text) })).filter(g=>g.items.length) } : null,
-    () => learningElementsExample(stds), { maxTokens:1500 });
+      items:(Array.isArray(g.items) ? g.items : []).map(it=>{ const c = String(it.cat||"").toLowerCase(); const text = String(it.text||it||"").trim();
+        return { cat: /^k|지식/.test(c) ? "k" : /^v|가치|태도/.test(c) ? "v" : /^s|과정|기능/.test(c) ? "s" : (/하기$/.test(text) ? "s" : "k"), text, code:String(it.code||"").replace(/[\[\]\s]/g,"").replace(prefix,"") }; }).filter(it=>it.text) })).filter(g=>g.items.length) } : null,
+    () => { const r = learningElementsExample(stds); r.groups.forEach(g=>g.items = g.items.map(({ cat, text, code })=>({ cat, text, code }))); return r; }, { maxTokens:1600 });
 }
-/* 빠진 성취기준이 있으면 그 성취기준의 요소를 규칙으로 뽑아 '미분류' 유목에 넣어요 */
+/* 빠진 성취기준이 있으면 규칙으로 뽑아 '미분류' 유목에 넣어요 */
 function leCover(r, stds){
   const used = new Set(r.groups.flatMap(g=>g.items.map(i=>i.code)));
   const miss = stds.filter(([n])=>!used.has(n));
-  if (miss.length){ const add = miss.flatMap(([n,t])=>leSplitStd(t).map(e=>({ text:e.text, code:n }))); if (add.length) r.groups.push({ name:"미분류 (빠진 성취기준)", items:add }); }
+  if (miss.length){ const add = miss.flatMap(([n,t])=>leSplitStd(t).map(e=>({ ...e, code:n }))); if (add.length) r.groups.push({ name:"미분류 (빠진 성취기준)", items:add }); }
   r.missing = miss.map(m=>m[0]);
   return r;
 }
-/* 유목·요소 → 뒤 단계가 쓰는 내용 요소(지식·이해 = 유목명, 과정·기능 = 요소) */
+/* 뒤 단계로: 세 범주 그대로 (유목은 함께 기억) */
 function syncCeFromLe(){
   const S = sel(), L = S.le; if (!L) return;
-  const v = (S.ce && S.ce.src === "le" ? S.ce.v : (S.ceCurr && S.ceCurr.v)) || [];
-  S.ce = { k: L.groups.map(g=>({ id:"g"+g.id, text:g.name, codes:[...new Set(g.items.map(i=>i.code).filter(Boolean))] })),
-           s: L.groups.flatMap(g=>g.items.map(i=>({ id:"e"+i.id, text:i.text, codes:i.code ? [i.code] : [] }))),
-           v, from:S.stds.slice(), src:"le" };
+  const by = cat => L.groups.flatMap(g=>g.items.filter(i=>i.cat===cat).map(i=>({ id:"e"+i.id, text:i.text, codes:i.code ? [i.code] : [], group:g.name })));
+  S.ce = { k:by("k"), s:by("s"), v:by("v"), from:S.stds.slice(), src:"le" };
 }
 async function runLE(){
   const a = curArea(), S = sel(), stds = a.stds.filter(([n])=>S.stds.includes(n)); if (!stds.length) return;
   ai.running = true; ai.err = ""; refreshCe();
   const r = leCover(await getLearningElements(stds), stds);
   ai.running = false;
-  S.le = { groups: r.groups.map(g=>({ id:rid(), name:g.name, items:g.items.map(i=>({ id:rid(), text:i.text, code:stds.some(s=>s[0]===i.code) ? i.code : "" })) })), from:S.stds.slice(), t:nowT(), ai:lastViaAI };
+  S.le = { groups: r.groups.map(g=>({ id:rid(), name:g.name, items:g.items.map(i=>({ id:rid(), cat:i.cat || "s", text:i.text, code:stds.some(s=>s[0]===i.code) ? i.code : "" })) })), from:S.stds.slice(), t:nowT(), ai:lastViaAI };
   leui.confirm = false; syncCeFromLe(); persist(); renderSide(); refreshCe();
   if (r.missing.length && aiOn()) toast(`AI가 빠뜨린 성취기준 ${r.missing.map(n=>`[${fullCode(n)}]`).join(", ")}의 요소를 '미분류' 유목에 넣었어요. 알맞은 유목으로 옮겨 주세요.`);
+}
+function leMoveSelect(it, g, L){
+  return `<select class="le-move" id="lem-${selKey()}-${it.id}" data-lemove="${it.id}" aria-label="범주나 유목 옮기기"><option value="">옮기기…</option>
+    <optgroup label="범주 바꾸기">${LE_CATS.filter(([c])=>c!==it.cat).map(([c,n])=>`<option value="c:${c}">→ ${n}</option>`).join("")}</optgroup>
+    <optgroup label="다른 유목으로">${L.groups.filter(x=>x.id!==g.id).map(x=>`<option value="g:${x.id}">→ ${esc(x.name)}</option>`).join("")}<option value="g:__new">→ 새 유목 만들기</option></optgroup></select>`;
 }
 function leHtml(a, modeBar){
   const S = sel(), L = S.le, stds = a.stds.filter(([n])=>S.stds.includes(n));
   const btn = stds.length ? `<button class="btn ${L?'':'primary'} sm" type="button" data-leact="run" ${ai.running?"disabled":""}>${sparkSvg}${ai.running ? "분석 중…" : L ? "다시 분석하기" : "성취기준 분석하기"}</button>` : "";
   const head = `<div class="block-head"><h3>내용 요소</h3><span class="n">학습 요소 유목화 (테스트)</span><span class="sp"></span>${btn}</div>`;
-  const intro = `<p class="ce-head-note">고른 성취기준을 분석해 학습 내용과 수행 요구를 '내용 + 반응지시어(~하기)'로 나누어 뽑고, 개념적 연관성이 있는 것끼리 묶어 유목명을 붙여요. 반응지시어가 같다는 이유만으로는 묶지 않고, 성취기준에 없는 내용은 더하지 않아요. ${aiOn() ? "" : "AI 연결 전이라 지금은 규칙으로 나누고 묶어요."}</p>`;
+  const intro = `<p class="ce-head-note">고른 성취기준을 분석해 학습 내용과 수행 요구를 나누어 뽑고, 지식·이해(내용) · 과정·기능(내용 + ~하기) · 가치·태도로 정리해요. 개념적으로 이어지는 요소끼리 유목으로 묶어 이름을 붙이고, 반응지시어가 같다는 이유만으로는 묶지 않아요. 성취기준에 없는 내용은 더하지 않아요. ${aiOn() ? "" : "AI 연결 전이라 지금은 규칙으로 나누고 묶어요."}</p>`;
   if (!stds.length) return `<section id="ceSec">${head}${modeBar}<p class="ce-head-note">성취기준을 먼저 골라 주세요.</p></section>`;
   let status = "";
   if (ai.running) status = `<div class="ce-status run"><span class="thinking">고른 성취기준 ${stds.length}개를 분석하는 중</span></div>`;
   else if (leui.confirm) status = `<div class="ce-status warn">다시 분석하면 고친 요소와 유목이 사라져요.<span class="sp"></span><button class="mini" type="button" data-leact="go">다시 분석하기</button><button class="mini" type="button" data-leact="cancel">취소</button></div>`;
   if (!L) return `<section id="ceSec">${head}${modeBar}${intro}${status}</section>`;
-  const nEl = L.groups.reduce((x,g)=>x+g.items.length, 0);
-  const usedCodes = new Set(L.groups.flatMap(g=>g.items.map(i=>i.code)));
-  const missing = stds.filter(([n])=>!usedCodes.has(n));
-  const opts = L.groups.map(g=>({ id:g.id, name:g.name }));
+  const all = L.groups.flatMap(g=>g.items), cnt = c => all.filter(i=>i.cat===c).length;
+  const usedCodes = new Set(all.map(i=>i.code)), missing = stds.filter(([n])=>!usedCodes.has(n));
   const groups = L.groups.map((g, gi)=>`<div class="le-group">
       <div class="le-gh"><span class="le-gn">${gi+1}</span><div class="le-gname" contenteditable="plaintext-only" role="textbox" tabindex="0" data-legname="${g.id}" id="leg-${selKey()}-${g.id}" data-ph="유목명" aria-label="유목명 고치기">${esc(g.name)}</div>
         <span class="le-cnt">${g.items.length}개</span><button class="ce-del" type="button" data-legdel="${g.id}" aria-label="이 유목 지우기" title="유목 지우기 (요소는 다른 유목으로 옮겨요)">×</button></div>
-      <ul class="le-items">${g.items.map(it=>`<li class="le-item">
-        <div class="le-main"><div class="le-text" contenteditable="plaintext-only" role="textbox" tabindex="0" data-letext="${it.id}" id="let-${selKey()}-${it.id}" data-ph="내용 ~하기" aria-label="요소 고치기">${esc(it.text)}</div>
-          <div class="le-meta">${it.code ? `<span class="le-code">${esc(fullCode(it.code))}</span>` : `<span class="le-code none">출처 없음</span>`}
-          <select class="le-move" id="lem-${selKey()}-${it.id}" data-lemove="${it.id}" aria-label="다른 유목으로 옮기기"><option value="">옮기기…</option>${opts.filter(o=>o.id!==g.id).map(o=>`<option value="${o.id}">→ ${esc(o.name)}</option>`).join("")}<option value="__new">→ 새 유목 만들기</option></select></div></div>
-        <button class="ce-del" type="button" data-ledel="${it.id}" aria-label="요소 지우기">×</button></li>`).join("") || `<li class="ana-none" style="padding:6px 2px">요소가 없어요</li>`}</ul>
-      <div class="cp-add" style="max-width:none"><input type="text" id="lea-${selKey()}-${g.id}" data-leadd="${g.id}" placeholder="+ 요소 직접 추가 (Enter)" aria-label="요소 직접 추가"></div>
+      ${LE_CATS.map(([c, cn])=>{ const xs = g.items.filter(i=>i.cat===c); return `<div class="le-cat ${c}"><div class="le-ch">${cn}<span>${xs.length}</span></div>
+        <ul class="le-items">${xs.map(it=>`<li class="le-item">
+          <div class="le-main"><div class="le-text" contenteditable="plaintext-only" role="textbox" tabindex="0" data-letext="${it.id}" id="let-${selKey()}-${it.id}" data-ph="${c==="s"?"내용 ~하기":"내용"}" aria-label="요소 고치기">${esc(it.text)}</div>
+            <div class="le-meta">${it.code ? `<span class="le-code">${esc(fullCode(it.code))}</span>` : `<span class="le-code none">출처 없음</span>`}${leMoveSelect(it, g, L)}</div></div>
+          <button class="ce-del" type="button" data-ledel="${it.id}" aria-label="요소 지우기">×</button></li>`).join("")}</ul>
+        <div class="le-add"><input type="text" id="lea-${selKey()}-${g.id}-${c}" data-leadd="${g.id}:${c}" placeholder="+ ${cn} 추가 (Enter)" aria-label="${cn} 직접 추가"></div></div>`; }).join("")}
     </div>`).join("");
   return `<section id="ceSec">${head}${modeBar}${intro}${status}
-    <div class="le-sum"><span>성취기준 <b>${stds.length}</b>개</span><span>요소 <b>${nEl}</b>개</span><span>유목 <b>${L.groups.length}</b>개</span>
+    <div class="le-sum"><span>성취기준 <b>${stds.length}</b>개</span><span>유목 <b>${L.groups.length}</b>개</span>
+      <span class="le-sc k">지식·이해 <b>${cnt("k")}</b></span><span class="le-sc s">과정·기능 <b>${cnt("s")}</b></span><span class="le-sc v">가치·태도 <b>${cnt("v")}</b></span>
       ${missing.length ? `<span class="le-miss">⚠ 요소가 없는 성취기준: ${missing.map(([n])=>esc(fullCode(n))).join(", ")}</span>` : `<span class="le-ok">✓ 고른 성취기준이 모두 반영됐어요</span>`}<span class="sp"></span>
       <button class="mini" type="button" data-legadd>+ 유목 추가</button></div>
     <div class="le-grid">${groups}</div>
-    <p class="pt-hint">요소와 유목명은 눌러서 고칠 수 있고, '옮기기'로 다른 유목에 재배치할 수 있어요. 뒤 단계에는 유목명이 지식·이해, 요소가 과정·기능으로 넘어가요.</p>
+    <p class="pt-hint">요소와 유목명은 눌러서 고칠 수 있고, '옮기기'로 범주를 바꾸거나 다른 유목으로 재배치할 수 있어요. 뒤 단계에는 지식·이해, 과정·기능, 가치·태도가 그대로 넘어가요.</p>
   </section>`;
 }
 function leFind(id){ const L = leOf(); for (const g of L.groups){ const i = g.items.findIndex(x=>x.id===id); if (i>=0) return { g, i, it:g.items[i] }; } return null; }
@@ -4803,8 +4833,8 @@ document.addEventListener("keydown", e=>{
     const fid = t.id; persist(); renderSide(); renderMain(); const el = document.getElementById(fid); if (el) el.focus(); return; }
   if (t.dataset && (t.dataset.legname || t.dataset.letext) && e.key==="Enter" && !e.isComposing){ e.preventDefault(); t.blur(); return; }
   if (t.dataset && t.dataset.leadd && e.key==="Enter" && !e.isComposing){
-    e.preventDefault(); const v = t.value.trim(); if (!v) return; const g = leOf().groups.find(x=>x.id===t.dataset.leadd); if (!g) return;
-    g.items.push({ id:rid(), text:v, code:"", mine:true }); const fid = t.id; leChanged(); const el = document.getElementById(fid); if (el) el.focus(); return; }
+    e.preventDefault(); const v = t.value.trim(); if (!v) return; const [gid, cat] = t.dataset.leadd.split(":"); const g = leOf().groups.find(x=>x.id===gid); if (!g) return;
+    g.items.push({ id:rid(), cat:cat || "s", text:v, code:"", mine:true }); const fid = t.id; leChanged(); const el = document.getElementById(fid); if (el) el.focus(); return; }
   if (t.dataset && t.dataset.ceadd && e.key==="Enter" && !e.isComposing){
     e.preventDefault();
     const v = t.value.trim(); if (!v) return;
@@ -4836,8 +4866,9 @@ document.addEventListener("change", e=>{
     else { const inp = document.getElementById(`evt-${selKey()}-${x.id}`); if (inp){ inp.focus(); inp.select(); } }
     return; }
   if (t.dataset.lemove){ const v = t.value; if (!v) return; const f = leFind(t.dataset.lemove); if (!f) return; const L = leOf();
-    let to = L.groups.find(g=>g.id===v); if (v === "__new"){ to = { id:rid(), name:"새 유목", items:[], edited:true }; L.groups.push(to); }
-    f.g.items.splice(f.i, 1); f.it.edited = true; to.items.push(f.it); leChanged(); return; }
+    if (v.startsWith("c:")){ f.it.cat = v.slice(2); f.it.edited = true; leChanged(); return; }
+    const gid = v.slice(2); let to = L.groups.find(g=>g.id===gid); if (gid === "__new"){ to = { id:rid(), name:"새 유목", items:[], edited:true }; L.groups.push(to); }
+    if (!to) return; f.g.items.splice(f.i, 1); f.it.edited = true; to.items.push(f.it); leChanged(); return; }
   if (t.dataset.lpetype !== undefined){ const r = sel().lp.rows.find(x=>x.id===t.dataset.lpid); const ev = r && lpEvals(r)[+t.dataset.lpetype]; if (!ev) return;
     ev.type = t.value; r.edited = true; persist(); renderMain(); const el = document.getElementById(t.id); if (el) el.focus({ preventScroll:true }); return; }
   if (t.dataset.lpspan || t.dataset.lpkind){ const L = sel().lp, id = t.dataset.lpspan || t.dataset.lpkind, r = L.rows.find(x=>x.id===id); if (!r) return;
