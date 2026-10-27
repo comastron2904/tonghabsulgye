@@ -2545,6 +2545,7 @@ function cpCheckHtml(){
       <button class="btn primary sm" type="button" data-xp="send" ${xpUI.running?"disabled":""}>답하기</button></div>
     <div class="cp-think-foot"><div class="cp-add"><input type="text" id="cpadd2-${selKey()}" data-cpadd placeholder="+ 핵심 개념 직접 더하기 (Enter)" aria-label="핵심 개념 직접 더하기"></div>
       <button class="mini" type="button" data-xp="skip" ${xpUI.running?"disabled":""}>다른 질문 받기</button>
+      ${xp.msgs.length>1?`<button class="mini" type="button" data-xp="reset" ${xpUI.running?"disabled":""} title="지금까지의 질문과 답을 지우고 첫 질문부터 다시 시작해요. 더한 핵심 개념은 그대로 남아요.">↺ 질문 새로 시작</button>`:""}
       <button class="btn sm" type="button" data-cpchk="yes">이대로 확정하기</button></div>
   </div>`;
 }
@@ -4924,6 +4925,7 @@ document.addEventListener("click", e=>{
   if (xb){ if (xpUI.running) return;
     if (xb.dataset.xp==="send"){ const el = document.getElementById("xpIn"), v = el ? el.value.trim() : ""; if (v) xpSend(v); else if (el) el.focus(); }
     else if (xb.dataset.xp==="skip") xpSkip();
+    else if (xb.dataset.xp==="reset"){ const C = sel().concepts; C.xp = { msgs:[], used:[] }; persist(); AI_FRESH = true; xpStart(); }
     return; }
   const cc = e.target.closest("[data-cpcand]");
   if (cc){ const C = sel().concepts, v = cc.dataset.cpcand, ex = C.list.find(c=>c.text===v); resetIdleChat();
