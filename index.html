@@ -2785,7 +2785,7 @@ JSON 하나만 답하세요: {"reply":"...","question":"...","tag":"...","focus"
 /* 대화 진행 */
 function coachSay(text){ dlgOf().msgs.push({ role:"coach", text, t:nowT() }); }
 /* 재구성 단계에 들어서면(알림이 나왔거나 재구성 문장이 있으면) 질문을 더 만들지 않아요 */
-const qStopped = d => !!(d && (d.notified || (riOf() && !d.fresh)));
+const qStopped = d => !!(d && !d.more && (d.notified || (riOf() && !d.fresh)));
 async function coachAskNext(focus, preset){
   if (qStopped(dlgOf())){ dlgOf().pending = null; return; }
   const d = dlgOf(), q = preset !== undefined ? preset : await getNextQuestion(focus);
@@ -2906,11 +2906,11 @@ function chatHtml(){
     : `<div class="msg teacher"><div class="bubble">${esc(m.text)}</div></div>`).join("");
   return `<div class="chat">
     <div class="thread" id="thread" aria-live="polite">${msgs}</div>
-    ${qStopped(d) ? `<div class="quick"><span class="quick-k">질문을 마쳤어요. 적어 주시는 내용은 메모로 기록돼요.</span><button class="chip ghost" type="button" data-icact="restart">↺ 처음부터 다시 대화</button></div>` : `<div class="quick"><span class="quick-k">주제</span>
+    ${qStopped(d) ? `<div class="quick"><span class="quick-k">질문을 마쳤어요. 적어 주시는 내용은 메모로 기록돼요.</span><button class="chip" type="button" data-icact="more">${sparkSvg}추가 질문 받기</button><button class="chip ghost" type="button" data-icact="restart">↺ 처음부터 다시 대화</button></div>` : `<div class="quick"><span class="quick-k">주제</span>
       ${THEMES.map(k=>`<button class="chip ${k}" type="button" data-asklens="${k}">${FOCUS_NAME[k]}</button>`).join("")}
       <span class="quick-k">설계</span>
       ${DESIGNS.map(k=>`<button class="chip ${k}" type="button" data-asklens="${k}">${FOCUS_NAME[k]}</button>`).join("")}
-      ${d.pending?`<button class="chip ghost" type="button" data-icact="skip">건너뛰기</button>`:""}</div>`}
+      ${d.pending?`<button class="chip ghost" type="button" data-icact="skip">건너뛰기</button>`:""}${d.more?`<button class="chip ghost" type="button" data-icact="stopmore">질문 마치기</button>`:""}</div>`}
     <form class="composer" id="composer"><label for="chatInput" class="sr-only">코치에게 답하기</label>
       <textarea id="chatInput" rows="1" placeholder="${d.pending?"질문에 답해 주세요 (Enter로 보내기)":"자유롭게 적어 주세요. 자유 메모로 기록돼요."}"></textarea>
       <button class="send" type="submit" aria-label="보내기"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
@@ -2960,7 +2960,9 @@ ${ctxFor("idea", ctx)}
 
 규칙
 - 핵심 아이디어는 단원이 끝난 뒤에도 남는 일반화된 이해를 한 문장으로 씁니다 (교육과정 핵심 아이디어 문체: "~은 ~하는 데 바탕이 된다/기여한다").
-- 핵심 개념(concepts: 비슷한 개념은 이미 상위 개념으로 묶어 둔 목록)을 문장 안에 넣고, 교사의 답에 드러난 좋은 삶·공동체·성장의 의도를 한 문장에 함께 녹입니다.
+- 핵심 개념을 나열하지 않습니다 ('A와 B와 C를 활용해…'처럼 개념을 늘어놓는 문장 금지). 핵심 개념(concepts: 비슷한 개념은 이미 상위 개념으로 묶어 둔 목록) 가운데 중심이 되는 2~3개를 골라, 개념 사이의 관계(원인과 결과, 조건, 영향, 목적, 변화)를 드러내는 일반화된 이해로 씁니다.
+- 학생이 '왜 중요한지, 무엇이 어떻게 이어지는지'를 깨닫게 하는 문장이어야 하며, 이 단원 밖의 상황에도 옮겨 쓸 수 있는 깊이로 씁니다.
+- 그리고 교사의 답에 드러난 좋은 삶·공동체·성장의 의도를 한 문장에 함께 녹입니다.
 - 근거가 된 답 번호(history의 순서, 1부터)와 개념을 basis에 적습니다.
 - JSON 하나만 답하세요: {"text":"...","basis":{"qa":[1,2],"concepts":["..."]}}`;
 }
@@ -2968,14 +2970,17 @@ function reconstructIdeasExample(){
   const S = sel(), d = dlgOf(), a = curArea();
   const log = d.log.filter(x=>x.focus!=="memo");
   const C = riConcepts().length ? riConcepts() : (S.concepts ? S.concepts.list.slice(0,2).map(c=>c.text) : [a.k[0]]);
-  const c1 = C[0], c2 = C[1] && C[1]!==C[0] ? C[1] : null;
+  const plain = [...C].sort((x,y)=>(/[과와]\s/.test(x)?1:0)-(/[과와]\s/.test(y)?1:0));   // 'A와 B' 꼴 이름은 뒤로 (문장이 꼬이지 않게)
+  const c1 = plain[0], c2 = plain[1] && plain[1]!==plain[0] ? plain[1] : null;
   const textOf = k => log.filter(x=>x.focus===k).map(x=>x.a).join(" ");
   // 공동체: 답에 나온 대상 / 성장: '~ 사람' 앞 꾸밈말
   const target = (textOf("comm").match(/이웃|지역 사회|지역|친구|가족|학교|교실|사회|사용자|주변 사람/)||[])[0] || "주변 사람";
   const gm = textOf("grow").match(/([가-힣]+(?:\s[가-힣]+){0,3})\s?사람/);
   const person = gm ? gm[1].trim() : "끝까지 문제를 해결해 내는";
-  const subj = c2 ? `${josa(c1,"과","와")} ${josa(c2,"을","를")}` : josa(c1,"을","를");
-  const text = `${subj} 활용해 ${target}의 불편과 필요를 함께 찾고 해결해 나가는 경험은, 학생이 ${person} 사람으로 성장하며 스스로 더 나은 삶과 더 좋은 공동체를 만들어 가는 바탕이 된다.`;
+  // 개념을 나열하지 않고, 개념 사이의 관계를 드러내는 일반화 문장으로
+  const text = c2
+    ? `${josa(c1,"은","는")} ${josa(c2,"과","와")} 서로 영향을 주고받으며, 이 관계를 이해하고 ${target}의 필요를 해결하는 데 적용해 보는 경험은 학생이 ${person} 사람으로 성장해 더 나은 삶과 공동체를 만들어 가는 바탕이 된다.`
+    : `${josa(c1,"은","는")} 우리가 문제를 해결하는 방식과 그 결과를 바꾸며, 그 까닭을 이해하고 ${target}의 필요에 적용해 보는 경험은 학생이 ${person} 사람으로 성장해 더 나은 삶과 공동체를 만들어 가는 바탕이 된다.`;
   return { text, basis:{ qa:log.map(x=>d.log.indexOf(x)+1), concepts:C.slice(0,2) } };
 }
 /* ▼ API 연결 지점 */
@@ -3095,7 +3100,7 @@ function riHtml(a){
       <span class="ri-step ${rd.total>=RI_MIN?'ok':''}">${rd.total>=RI_MIN?"✓ ":""}답 ${Math.min(rd.total,RI_MIN)}/${RI_MIN}</span></div>`;
     const body = rd.ready
       ? `<div class="ri-ready"><b>재구성할 준비가 됐어요.</b><p>설계 코치와 나눈 답 ${rd.total}개와 고른 핵심 개념을 종합해 새 핵심 아이디어를 한 문장으로 만들어 드려요.</p>
-         <button class="btn primary sm" type="button" data-riact="make" ${rui.busy?"disabled":""}>${sparkSvg}${rui.busy?"만드는 중…":"핵심 아이디어 재구성하기"}</button></div>`
+         <div class="ri-ask-btns"><button class="btn primary sm" type="button" data-riact="make" ${rui.busy?"disabled":""}>${sparkSvg}${rui.busy?"만드는 중…":"핵심 아이디어 재구성하기"}</button>${qStopped(d)?`<button class="btn sm" type="button" data-icact="more">추가 질문 받기</button>`:""}</div></div>`
       : `<p class="ce-head-note">설계 코치와의 대화가 아래 조건을 채우면 재구성을 알려 드려요.</p>`;
     return `<section id="riSec">${head("")}${prog}${rd.ready ? rgBoxHtml() : ""}${body}${orig}</section>`;
   }
@@ -3105,7 +3110,7 @@ function riHtml(a){
   else if (newer > 0) status = `<div class="ce-status">초안을 만든 뒤 기록이 ${newer}개 더 쌓였어요. 필요하면 다시 재구성할 수 있어요.</div>`;
   else if (ri.cons !== undefined && ri.cons !== riConcepts().join("|") && !rgUI.busy) status = `<div class="ce-status warn">재구성에 쓸 핵심 개념이 바뀌었어요. 반영하려면 '다시 재구성'을 눌러 주세요.</div>`;
   const bs = ri.basis || { qa:[], concepts:[] };
-  return `<section id="riSec">${head(`<button class="btn sm" type="button" data-riact="again">${sparkSvg}다시 재구성</button>`)}
+  return `<section id="riSec">${head(`${qStopped(d)?`<button class="mini" type="button" data-icact="more">추가 질문 받기</button>`:""}<button class="btn sm" type="button" data-riact="again">${sparkSvg}다시 재구성</button>`)}
     <p class="ce-head-note">설계 코치와 나눈 답과 고른 핵심 개념을 종합한 한 문장이에요. 읽어 보고 수정할지 정해 주세요. AI 연결 전이라 지금은 예시 문장 틀로 만들어요.</p>
     ${rgBoxHtml()}
     ${status}
@@ -4996,6 +5001,10 @@ document.addEventListener("click", e=>{
       S.dlg = { msgs:[], log:[], used:[], pending:null, fresh: !!riOf() }; if (riOf()) riOf().logN = 0;
       if (sideUI.notesClosed) setNotesClosed(false); ui.np3 = "chat";
       persist(); renderSide(); renderMain(); startChat().then(afterChat); return; }
+    if (act==="more"){ const d = dlgOf(); d.more = true; if (sideUI.notesClosed) setNotesClosed(false); ui.np3 = "chat";
+      coachSay("좋아요, 질문을 더 이어 갈게요. 지금까지의 답을 바탕으로 더 깊이 여쭤볼게요. 그만하고 싶으시면 '질문 마치기'를 눌러 주세요.");
+      (async()=>{ await coachAskNext(); afterChat(); })(); return; }
+    if (act==="stopmore"){ const d = dlgOf(); d.more = false; d.pending = null; coachSay("추가 질문은 여기까지 할게요. 새로 나눈 답을 반영하려면 핵심 아이디어를 다시 재구성해 보세요."); afterChat(); return; }
     if (act==="skip") skipQ().then(afterChat);
     else { if (sideUI.notesClosed) setNotesClosed(false); ui.np3 = "chat"; startChat().then(afterChat); }
     return; }
