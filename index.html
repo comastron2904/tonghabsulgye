@@ -266,16 +266,22 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .cp-yn:hover{border-color:var(--accent)}
 .cp-yn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .cp-check .cq-done{font-size:12.5px;color:var(--muted);margin-top:6px}
-.cp-think{margin-top:12px;display:grid;gap:8px}
-.cp-think .tq{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-.cp-think .tq-q{font-size:13.5px;color:var(--ink);display:flex;gap:8px}
-.cp-think .tq-n{flex:none;width:20px;height:20px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:11.5px;font-weight:700;display:grid;place-items:center}
-.cp-think .tq-c{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0 28px;align-items:center}
-.cp-think .tq-c .lab{font-size:11.5px;color:var(--muted)}
+.xp-thread{margin-top:12px;display:grid;gap:10px}
+.xp-thread .bubble{max-width:100%}
+.xp-thread .msg.teacher .bubble{background:var(--surface);border:1px solid var(--accent-line);border-top-right-radius:4px;max-width:80%}
+.xp-thread .coach-msg .bubble{background:var(--surface)}
+.lens-tag.xp{background:var(--accent)}
+.xp-c{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.xp-c .lab{font-size:11.5px;color:var(--muted);margin-right:2px}
+.xp-c .lab:not(:first-child){margin-left:6px}
+.xp-dup{font-size:12.5px;color:var(--muted);padding:3px 6px}
+.xp-in{display:flex;gap:8px;align-items:flex-end;margin-top:12px}
+.xp-in textarea{flex:1;resize:vertical;min-height:44px;border:1px solid var(--accent-line);border-radius:14px;padding:9px 12px;font:inherit;font-size:13px;background:var(--surface);color:var(--ink)}
+.xp-in textarea:focus{outline:none;border-color:var(--accent)}
 .cp-cand{border:1px dashed var(--accent-line);background:transparent;color:var(--accent);border-radius:999px;padding:3px 11px;font:inherit;font-size:12.5px;cursor:pointer}
 .cp-cand:hover{background:var(--accent-soft);border-style:solid}
 .cp-cand.on{border-style:solid;background:var(--accent-soft);color:var(--ink)}
-.cp-think-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
+.cp-think-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
 .cp-think-foot .cp-add{margin-top:0;flex:1;min-width:200px}
 .cp-add input{width:100%;border:1px dashed var(--line);border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;color:var(--ink);background:transparent}
 .cp-add input:focus{border-style:solid;border-color:var(--accent-line);outline:none;background:var(--surface)}
@@ -2396,65 +2402,142 @@ function conceptChipsHtml(store, chipAttr, addAttr, addId, tagOf){
 const fromTag = c => (c.surface && !c.surface.startsWith(c.text)) ? `← ${esc(c.surface)}` : "";
 /* 핵심 개념 확인: '놓쳐서는 안 될 핵심 개념이 모두 포함되었나요?' → 네(교사 의도 파악으로) / 아니오(더 고민할 질문 + 개념 더하기) */
 const cpChecked = () => { const S = sel(), C = S.concepts; return !!(C && C.picked.length && C.check==="yes") || !!(S.dlg && S.dlg.log.length); };
-const cpThink = { running:false };
-function cpThinkExample(){
-  const S = sel(), C = S.concepts, a = curArea(), ce = S.ce || {};
-  const have = new Set(C.list.filter(c=>C.picked.includes(c.id)).map(c=>c.text));
-  const unpicked = C.list.filter(c=>!C.picked.includes(c.id)).map(c=>c.text);
-  const ideaTxt = (S.ideas.length ? S.ideas.map(i=>a.ideas[i]) : a.ideas).filter(Boolean);
-  const ideaW = [...CORE_LEX].filter(w=>w.length>=2 && ideaTxt.some(t=>t.includes(w)) && !have.has(w) && !unpicked.includes(w)).sort((x,y)=>y.length-x.length);
-  const sItem = (ce.s||[])[0] ? ce.s[0].text : "";
-  const used = new Set(); const take = (arr,n)=>arr.filter(x=>!used.has(x)).slice(0,n).map(x=>(used.add(x),x));
-  const qs = [
-    { q:"이 단원을 배운 학생이 1년 뒤 친구에게 설명할 수 있어야 하는 건 무엇일까요?", cands: take(ideaW,3) },
-    { q: sItem ? `학생이 '${sItem}'에서 막힌다면, 무엇을 몰라서일까요?` : "학생이 수업 활동에서 막힌다면, 무엇을 몰라서일까요?", cands: take(unpicked,3) },
-    { q:"전에 이 단원을 가르칠 때 학생들이 가장 많이 헷갈려 한 건 무엇이었나요?", cands: take([...unpicked, ...ideaW],3) },
-  ];
-  return { questions: qs };
-}
-async function getCpThink(){
+/* ---------- 핵심 개념 추가 탐색 (교사와 한 번에 한 질문씩 대화) ----------
+   · 고른 성취기준·내용 요소·뽑힌 개념을 함께 보고, 기존 개념에서 덜 드러난 의미·관점을 묻는 열린 질문을 하나씩 해요.
+   · 사고 관점: 본질 · 구성 · 관계 · 원인과 영향 · 변화 · 관점 · 확장 가운데 알맞은 것을 골라요.
+   · 교사의 답에서 개념 후보를 뽑고, 이미 있는 개념과 겹치는지 확인한 뒤 더할지 제안해요 (정답 유도·개수 늘리기 X).
+   ▼ API 연결 지점: getXpFirst(), getXpReply(answer) */
+const jos = (w, a, b) => { const c = String(w).trim().slice(-1).charCodeAt(0); return w + ((c>=0xAC00 && c<=0xD7A3 && (c-0xAC00)%28) ? a : b); };
+const XP_LENS = ["본질","구성","관계","원인과 영향","변화","관점","확장"];
+const xpUI = { running:false };
+const xpOf = () => { const C = sel().concepts; if (!C.xp) C.xp = { msgs:[], used:[] }; return C.xp; };
+function xpContext(){
   const S = sel(), C = S.concepts, a = curArea(), ce = S.ce || {};
   const picked = C.list.filter(c=>C.picked.includes(c.id)).map(c=>c.text), rest = C.list.filter(c=>!C.picked.includes(c.id)).map(c=>c.text);
-  const ideaTxt = (S.ideas.length ? S.ideas.map(i=>a.ideas[i]) : a.ideas).filter(Boolean);
+  const stds = S.stds.map(n=>{ const f = a.stds.find(x=>x[0]===n); return f ? `[${n}] ${f[1]}` : n; }).join("\n");
   const lines = ["k","s","v"].map(k=>`[${CAT_NAME[k]}] ${(ce[k]||[]).map(x=>x.text).join(" / ") || "-"}`).join("\n");
-  return viaAI("핵심 개념 점검 질문", `중학교 ${cur().name} '${a.name}' 단원을 설계하는 교사가 핵심 개념을 골랐지만, 놓친 핵심 개념이 있다고 느낍니다.
-교사가 빠진 핵심 개념을 스스로 떠올리도록 돕는 성찰 질문 3개를 만드세요.
-[핵심 아이디어] ${ideaTxt.join(" / ")}
+  return { picked, rest, text:`중학교 ${cur().name} '${a.name}'
+[고른 성취기준]
+${stds}
 [내용 요소]
 ${lines}
-[고른 핵심 개념] ${picked.join(", ") || "-"}
-[고르지 않은 후보] ${rest.join(", ") || "-"}
-- '~개념이 있나요?'처럼 예/아니오로 답하는 질문은 쓰지 않습니다. 교사가 자기 수업과 학생을 떠올리며 스스로 생각하게 하는 열린 질문(무엇일까요? / 왜일까요? / 무엇이었나요?)으로 씁니다.
-- 쉬운 일상 말로 한 문장, 40자 안팎. '전이', '오개념', '상위 개념' 같은 용어나 괄호 예시는 쓰지 않습니다.
-- 세 질문은 서로 다른 장면을 떠올리게 합니다. 예: '이 단원을 배운 학생이 1년 뒤 친구에게 설명할 수 있어야 하는 건 무엇일까요?' / '학생이 (이 단원의 활동)에서 막힌다면, 무엇을 몰라서일까요?' / '전에 이 단원을 가르칠 때 학생들이 가장 많이 헷갈려 한 건 무엇이었나요?'
-- cands에는 질문과 관련해 더할 만한 핵심 개념 낱말(명사)을 0~3개. 이미 고른 개념은 넣지 않습니다.
-JSON 하나만 답하세요: {"questions":[{"q":"...","cands":["..."]}]}`,
-    r => r && Array.isArray(r.questions) && r.questions.length ? { questions: r.questions.slice(0,3).map(x=>({ q:String(x.q||x), cands:(Array.isArray(x.cands)?x.cands:[]).map(String).filter(Boolean).slice(0,3) })).filter(x=>x.q) } : null,
-    cpThinkExample, { maxTokens:600 });
+[교사가 고른 핵심 개념] ${picked.join(", ") || "-"}
+[뽑혔지만 고르지 않은 개념] ${rest.join(", ") || "-"}` };
 }
-async function runCpThink(){
-  const C = sel().concepts; cpThink.running = true; renderMain();
-  try { const r = await getCpThink(); C.think = r.questions; } finally { cpThink.running = false; }
-  persist(); renderMain();
-  const el = document.getElementById("cpCheck"); if (el) el.scrollIntoView({ block:"nearest", behavior:"smooth" });
+const XP_RULES = `- 기존 개념에서 충분히 드러나지 않은 의미나 관점을 탐색합니다.
+- 사고 관점(본질, 구성, 관계, 원인과 영향, 변화, 관점, 확장) 가운데 지금 알맞은 하나를 골라 묻습니다. 이미 쓴 관점은 되도록 피합니다.
+- 어느 교과에도 쓸 수 있는 열린 질문 틀이되, 이 단원의 학습 내용(성취기준·내용 요소·개념 이름)을 넣어 구체화합니다. 예/아니오로 답하는 질문은 쓰지 않습니다.
+- 쉬운 말로 한 문장, 질문은 하나만. 특정 개념을 정답으로 유도하지 않습니다.`;
+/* 규칙 예시: 관점별 질문 틀 */
+const XP_TPL = {
+  "본질":       (x)=>`학생에게 '${x}'의 뜻을 한마디로 설명한다면, 무엇이라고 하시겠어요?`,
+  "구성":       (x)=>`'${x}' 안에는 어떤 요소들이 들어 있다고 볼 수 있을까요?`,
+  "관계":       (x,y)=>y ? `'${x}', '${y}' 두 개념은 이 단원에서 서로 어떻게 이어질까요?` : `'${x}'${jos(x,"은","는").slice(x.length)} 이 단원의 다른 내용과 어떻게 이어질까요?`,
+  "원인과 영향": (x)=>`'${x}' 때문에 생기는 일, 또는 '${x}'에 영향을 주는 것은 무엇일까요?`,
+  "변화":       (x)=>`시간이 지나거나 상황이 바뀌면, '${x}'에서는 무엇이 달라질까요?`,
+  "관점":       (x)=>`'${x}'${jos(x,"을","를").slice(x.length)} 만드는 사람과 쓰는 사람은 각각 무엇을 중요하게 볼까요?`,
+  "확장":       (x)=>`학생이 교실 밖 생활에서 '${x}'${jos(x,"과","와").slice(x.length)} 관련된 장면을 만나는 때는 언제일까요?`,
+};
+function xpQuestionExample(focus){
+  const xp = xpOf(), { picked, rest } = xpContext();
+  const lens = XP_LENS.find(l=>!xp.used.includes(l)) || XP_LENS[xp.used.length % XP_LENS.length];
+  const pool = [...picked, ...rest]; const x = focus || pool[xp.used.length % Math.max(1,pool.length)] || curArea().name;
+  const y = pool.find(p=>p!==x);
+  return { lens, q: XP_TPL[lens](x, y) };
 }
+/* 교사 답에서 개념 후보 뽑기 (규칙 예시) */
+function xpCandsExample(answer){
+  const C = sel().concepts, have = C.list.map(c=>c.text);
+  const vocab = new Set([...CORE_LEX, ...areaVocab()]);
+  const found = [...vocab].filter(w=>w.length>=2 && answer.includes(w)).sort((x,y)=>y.length-x.length)
+    .filter((w,i,arr)=>!arr.slice(0,i).some(l=>l.includes(w)));
+  answer.split(/[\s,.!?·]+/).map(t=>t.replace(/(이라는|라는|이나|이고|이며|이에요|예요|이다|으로|에서|에게|까지|부터|처럼|하고|과|와|은|는|이|가|을|를|의|도|만|로|에)$/,""))
+    .filter(t=>t.length>=3 && isCore(t) && !found.includes(t)).forEach(t=>found.push(t));
+  const dup = found.filter(w=>have.includes(w)), cands = found.filter(w=>!have.includes(w)).slice(0,2);
+  return { cands, dup:dup.slice(0,3) };
+}
+async function getXpFirst(){
+  const c = xpContext();
+  return viaAI("핵심 개념 탐색 질문", `교사가 핵심 개념의 추가 탐색을 요청했습니다. 아래 성취기준, 내용 요소, 지금까지의 개념을 종합적으로 분석해 첫 질문 하나를 만드세요.
+${c.text}
+${XP_RULES}
+JSON 하나만 답하세요: {"lens":"본질|구성|관계|원인과 영향|변화|관점|확장","q":"질문 한 문장"}`,
+    r => r && r.q ? { lens: XP_LENS.includes(r.lens) ? r.lens : "관점", q:String(r.q) } : null,
+    () => xpQuestionExample(), { maxTokens:300 });
+}
+async function getXpReply(answer){
+  const c = xpContext(), xp = xpOf();
+  const talk = xp.msgs.filter(m=>m.role!=="sys").map(m=>m.role==="coach" ? `코치(${m.lens||""}): ${m.q||m.text}` : `교사: ${m.text}`).join("\n");
+  return viaAI("핵심 개념 탐색 응답", `교사와 핵심 개념을 추가로 탐색하는 대화입니다.
+${c.text}
+[지금까지 대화]
+${talk}
+[교사의 새 답] ${answer}
+
+1) 교사의 답에서 핵심 개념 후보(명사 낱말)를 뽑습니다. 답에 실제로 드러난 것만, 0~2개. 불필요하게 늘리지 않습니다.
+2) 후보가 이미 있는 개념([교사가 고른 핵심 개념], [뽑혔지만 고르지 않은 개념])과 같거나 뜻이 겹치면 cands가 아니라 dup에 그 기존 개념 이름을 적습니다.
+3) say: 교사의 답을 받아 한두 문장으로 짧게 정리하고, 후보가 있으면 더할지 가볍게 제안합니다 (강요하지 않음).
+4) q: 교사의 답을 이어받는 후속 질문 하나. 이미 쓴 관점(${xp.used.join(", ")||"-"})은 되도록 피합니다.
+${XP_RULES}
+JSON 하나만 답하세요: {"cands":["..."],"dup":["..."],"say":"...","lens":"...","q":"..."}`,
+    r => r && (r.q || r.say) ? { cands:(r.cands||[]).map(String).filter(Boolean).slice(0,2), dup:(r.dup||[]).map(String).filter(Boolean).slice(0,3), say:String(r.say||""), lens: XP_LENS.includes(r.lens) ? r.lens : "", q:String(r.q||"") } : null,
+    () => { const k = xpCandsExample(answer), nx = xpQuestionExample(k.cands[0]);
+      const say = k.cands.length ? `말씀하신 내용에서 ${k.cands.map(x=>`'${x}'`).join(", ")}${jos(k.cands[k.cands.length-1],"을","를").slice(k.cands[k.cands.length-1].length)} 개념 후보로 볼 수 있겠어요. 더할지는 선생님이 정해 주세요.`
+        : k.dup.length ? `말씀하신 내용은 이미 있는 ${k.dup.map(x=>`'${x}'`).join(", ")}${jos(k.dup[k.dup.length-1],"과","와").slice(k.dup[k.dup.length-1].length)} 겹쳐요. 새로 더할 개념은 없어 보여요.`
+        : "답을 잘 받았어요. 새 개념 후보는 따로 보이지 않아요.";
+      return { ...k, say, lens:nx.lens, q:nx.q }; }, { maxTokens:500 });
+}
+async function xpStart(){
+  const xp = xpOf(); if (xp.msgs.length) return;
+  xpUI.running = true; renderMain();
+  try { const r = await getXpFirst(); xp.used.push(r.lens); xp.msgs.push({ role:"coach", lens:r.lens, q:r.q }); }
+  finally { xpUI.running = false; }
+  persist(); renderMain(); xpFocus();
+}
+async function xpSend(answer){
+  const xp = xpOf(); xp.msgs.push({ role:"t", text:answer });
+  xpUI.running = true; renderMain();
+  try { const r = await getXpReply(answer);
+    xp.msgs.push({ role:"coach", say:r.say, cands:r.cands, dup:r.dup, lens:r.lens, q:r.q });
+    if (r.lens) xp.used.push(r.lens);
+  } finally { xpUI.running = false; }
+  persist(); renderMain(); xpFocus();
+}
+async function xpSkip(){
+  const xp = xpOf(); xpUI.running = true; renderMain();
+  try { const r = xpQuestionExample(); const a = aiOn() ? await getXpFirst() : r;
+    xp.used.push(a.lens); xp.msgs.push({ role:"coach", lens:a.lens, q:a.q, skip:true }); }
+  finally { xpUI.running = false; }
+  persist(); renderMain(); xpFocus();
+}
+function xpFocus(){ const el = document.getElementById("xpIn"); if (el){ el.focus({ preventScroll:true }); el.scrollIntoView({ block:"nearest", behavior:"smooth" }); } }
 function cpCheckHtml(){
   const C = sel().concepts; if (!C || !C.picked.length) return "";
   const v = C.check;
   const q = `<div class="cq"><span class="cq-t">이 단원에서 결코 놓쳐서는 안 될 핵심 개념이 모두 포함되었나요?</span>
     <span class="cq-b" role="radiogroup" aria-label="핵심 개념 확인"><button type="button" class="cp-yn ${v==="yes"?'on':''}" role="radio" aria-checked="${v==="yes"}" data-cpchk="yes">네</button><button type="button" class="cp-yn ${v==="no"?'on':''}" role="radio" aria-checked="${v==="no"}" data-cpchk="no">아니오</button></span></div>`;
   if (v==="yes") return `<div class="cp-check" id="cpCheck">${q}<div class="cq-done">확인했어요. 아래 '교사 의도 파악'으로 넘어가요. 개념을 더 고르거나 더해도 괜찮아요.</div></div>`;
-  if (v!=="no") return `<div class="cp-check" id="cpCheck">${q}<div class="cq-done">'네'를 누르면 교사 의도 파악으로 넘어가고, '아니오'를 누르면 핵심 개념을 더 고민해 볼 질문을 드려요.</div></div>`;
-  const have = new Set(C.list.filter(c=>C.picked.includes(c.id)).map(c=>c.text));
-  const think = cpThink.running ? `<div class="ce-status run"><span class="thinking">핵심 개념을 더 고민해 볼 질문을 준비하는 중</span></div>`
-    : (C.think||[]).map((x,i)=>`<div class="tq"><div class="tq-q"><span class="tq-n">${i+1}</span><span>${esc(x.q)}</span></div>
-        ${x.cands.length?`<div class="tq-c"><span class="lab">이런 개념은 어때요?</span>${x.cands.map(c=>`<button type="button" class="cp-cand ${have.has(c)?'on':''}" data-cpcand="${esc(c)}" aria-pressed="${have.has(c)}">${have.has(c)?"✓ ":"+ "}${esc(c)}</button>`).join("")}</div>`:""}</div>`).join("");
+  if (v!=="no") return `<div class="cp-check" id="cpCheck">${q}<div class="cq-done">'네'를 누르면 교사 의도 파악으로 넘어가고, '아니오'를 누르면 질문을 주고받으며 핵심 개념을 더 찾아봐요.</div></div>`;
+  const xp = xpOf(), have = C.list, isPicked = t => { const c = have.find(x=>x.text===t); return c && C.picked.includes(c.id); };
+  const candBtn = t => { const on = isPicked(t); return `<button type="button" class="cp-cand ${on?'on':''}" data-cpcand="${esc(t)}" aria-pressed="${on}">${on?"✓ ":"+ "}${esc(t)}</button>`; };
+  const avatar = `<div class="avatar" aria-hidden="true">${sparkSvg}</div>`;
+  const msgs = xp.msgs.map(m=>{
+    if (m.role==="t") return `<div class="msg teacher"><div class="bubble">${esc(m.text)}</div></div>`;
+    const sayPart = m.say ? `<div class="bubble">${esc(m.say)}${(m.cands&&m.cands.length)||(m.dup&&m.dup.length)?`<div class="xp-c">
+        ${(m.cands||[]).length?`<span class="lab">새 개념 후보</span>${m.cands.map(candBtn).join("")}`:""}
+        ${(m.dup||[]).filter(d=>have.some(x=>x.text===d)).length?`<span class="lab">이미 있는 개념</span>${m.dup.filter(d=>have.some(x=>x.text===d)).map(d=>isPicked(d)?`<span class="xp-dup">✓ ${esc(d)}</span>`:candBtn(d)).join("")}`:""}</div>`:""}</div>` : "";
+    const qPart = m.q ? `${m.lens?`<span class="lens-tag xp">${esc(m.lens)}</span>`:""}<div class="bubble">${esc(m.q)}</div>` : "";
+    return `<div class="msg coach-msg">${avatar}<div class="msg-col">${sayPart}${qPart}</div></div>`;
+  }).join("");
+  const wait = xpUI.running ? `<div class="msg coach-msg">${avatar}<div class="msg-col"><div class="bubble"><span class="thinking">${xp.msgs.length?"답을 살펴보는 중":"성취기준과 개념을 살펴보고 질문을 준비하는 중"}</span></div></div></div>` : "";
   return `<div class="cp-check" id="cpCheck">${q}
-    <div class="cp-think">${think}
-      <div class="cp-think-foot"><div class="cp-add"><input type="text" id="cpadd2-${selKey()}" data-cpadd placeholder="+ 떠오른 핵심 개념 더하기 (Enter)" aria-label="떠오른 핵심 개념 더하기"></div>
-        <button class="mini" type="button" data-cpchk="more" ${cpThink.running?"disabled":""}>질문 다시 받기</button>
-        <button class="btn primary sm" type="button" data-cpchk="yes">이제 모두 포함됐어요</button></div>
-    </div></div>`;
+    <div class="xp-thread">${msgs}${wait}</div>
+    <div class="xp-in"><textarea id="xpIn" rows="2" placeholder="떠오르는 생각을 편하게 적어 주세요 (Enter로 보내기, Shift+Enter 줄바꿈)" aria-label="질문에 답하기" ${xpUI.running?"disabled":""}></textarea>
+      <button class="btn primary sm" type="button" data-xp="send" ${xpUI.running?"disabled":""}>답하기</button></div>
+    <div class="cp-think-foot"><div class="cp-add"><input type="text" id="cpadd2-${selKey()}" data-cpadd placeholder="+ 핵심 개념 직접 더하기 (Enter)" aria-label="핵심 개념 직접 더하기"></div>
+      <button class="mini" type="button" data-xp="skip" ${xpUI.running?"disabled":""}>다른 질문 받기</button>
+      <button class="btn sm" type="button" data-cpchk="yes">이대로 확정하기</button></div>
+  </div>`;
 }
 function step3Html(a){
   const S = sel(), ce = S.ce;
@@ -4823,8 +4906,12 @@ document.addEventListener("click", e=>{
   if (ck){ const C = sel().concepts, v = ck.dataset.cpchk; if (!C) return;
     if (v==="yes"){ C.check = "yes"; resetIdleChat(); persist(); renderSide(); renderMain(); renderNotes();
       const el = document.getElementById("icSec"); if (el) el.scrollIntoView({ block:"start", behavior:"smooth" }); return; }
-    if (v==="no"){ C.check = "no"; persist(); renderSide(); renderNotes(); if (!C.think) runCpThink(); else renderMain(); return; }
-    if (v==="more"){ AI_FRESH = true; runCpThink(); return; }
+    if (v==="no"){ C.check = "no"; persist(); renderSide(); renderNotes(); renderMain(); xpStart(); return; }
+    return; }
+  const xb = e.target.closest("[data-xp]");
+  if (xb){ if (xpUI.running) return;
+    if (xb.dataset.xp==="send"){ const el = document.getElementById("xpIn"), v = el ? el.value.trim() : ""; if (v) xpSend(v); else if (el) el.focus(); }
+    else if (xb.dataset.xp==="skip") xpSkip();
     return; }
   const cc = e.target.closest("[data-cpcand]");
   if (cc){ const C = sel().concepts, v = cc.dataset.cpcand, ex = C.list.find(c=>c.text===v); resetIdleChat();
@@ -4991,6 +5078,7 @@ document.addEventListener("keydown", e=>{
     if (!ex){ const id = rid(); K.list.push({ id, text:v, surface:v, mine:true }); K.picked.push(id); }
     const fid = t.id; persist(); renderSide(); renderMain(); const el = document.getElementById(fid); if (el) el.focus(); return;
   }
+  if (t.id==="xpIn" && e.key==="Enter" && !e.shiftKey && !e.isComposing){ e.preventDefault(); const v = t.value.trim(); if (v && !xpUI.running) xpSend(v); return; }
   if (t.dataset && t.dataset.cpadd !== undefined && e.key==="Enter" && !e.isComposing){
     e.preventDefault(); const v = t.value.trim(); if (!v) return;
     const C = sel().concepts, ex = C.list.find(c=>c.text===v);
