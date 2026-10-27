@@ -2406,9 +2406,9 @@ function cpThinkExample(){
   const sItem = (ce.s||[])[0] ? ce.s[0].text : "";
   const used = new Set(); const take = (arr,n)=>arr.filter(x=>!used.has(x)).slice(0,n).map(x=>(used.add(x),x));
   const qs = [
-    { q:"단원이 끝나도 학생 머릿속에 꼭 남았으면 하는 개념이 있나요?", cands: take(ideaW,3) },
-    { q: sItem ? `'${sItem}' 활동을 하려면 먼저 알아야 할 개념이 있나요?` : "수업 활동을 하려면 먼저 알아야 할 개념이 있나요?", cands: take(unpicked,3) },
-    { q:"학생들이 자주 헷갈리거나 잘못 아는 개념이 있나요?", cands: take([...unpicked, ...ideaW],3) },
+    { q:"이 단원을 배운 학생이 1년 뒤 친구에게 설명할 수 있어야 하는 건 무엇일까요?", cands: take(ideaW,3) },
+    { q: sItem ? `학생이 '${sItem}'에서 막힌다면, 무엇을 몰라서일까요?` : "학생이 수업 활동에서 막힌다면, 무엇을 몰라서일까요?", cands: take(unpicked,3) },
+    { q:"전에 이 단원을 가르칠 때 학생들이 가장 많이 헷갈려 한 건 무엇이었나요?", cands: take([...unpicked, ...ideaW],3) },
   ];
   return { questions: qs };
 }
@@ -2424,8 +2424,9 @@ async function getCpThink(){
 ${lines}
 [고른 핵심 개념] ${picked.join(", ") || "-"}
 [고르지 않은 후보] ${rest.join(", ") || "-"}
-- 질문은 아주 쉽고 짧게: 한 문장, 30자 안팎, 일상 말투('~있나요?'). '전이', '오개념', '상위 개념' 같은 어려운 용어나 괄호 예시는 쓰지 않습니다.
-- 세 질문은 서로 다른 쪽을 묻습니다: 단원이 끝나도 남아야 할 개념 / 활동을 하려면 먼저 알아야 할 개념 / 학생들이 자주 헷갈리는 개념.
+- '~개념이 있나요?'처럼 예/아니오로 답하는 질문은 쓰지 않습니다. 교사가 자기 수업과 학생을 떠올리며 스스로 생각하게 하는 열린 질문(무엇일까요? / 왜일까요? / 무엇이었나요?)으로 씁니다.
+- 쉬운 일상 말로 한 문장, 40자 안팎. '전이', '오개념', '상위 개념' 같은 용어나 괄호 예시는 쓰지 않습니다.
+- 세 질문은 서로 다른 장면을 떠올리게 합니다. 예: '이 단원을 배운 학생이 1년 뒤 친구에게 설명할 수 있어야 하는 건 무엇일까요?' / '학생이 (이 단원의 활동)에서 막힌다면, 무엇을 몰라서일까요?' / '전에 이 단원을 가르칠 때 학생들이 가장 많이 헷갈려 한 건 무엇이었나요?'
 - cands에는 질문과 관련해 더할 만한 핵심 개념 낱말(명사)을 0~3개. 이미 고른 개념은 넣지 않습니다.
 JSON 하나만 답하세요: {"questions":[{"q":"...","cands":["..."]}]}`,
     r => r && Array.isArray(r.questions) && r.questions.length ? { questions: r.questions.slice(0,3).map(x=>({ q:String(x.q||x), cands:(Array.isArray(x.cands)?x.cands:[]).map(String).filter(Boolean).slice(0,3) })).filter(x=>x.q) } : null,
