@@ -4466,9 +4466,12 @@ async function callLLMOnce(prompt, opts = {}){
     throw e;
   }
 }
+/* 모든 AI 요청에 붙여요: 교사에게 하는 말은 언제나 존댓말 */
+const POLITE = "\n\n(말투: 교사에게 하는 말(질문, 안내, 정리, 제안, 이유 설명)은 반말 없이 항상 존댓말(해요체: ~해요, ~인가요?, ~할까요?)로 씁니다. 단, 형식이 정해진 항목(명사구, '~하기', '~한다' 등)은 그 형식을 그대로 따릅니다.)";
 const BRIEF = "\n\n(답할 때 설명이나 인사 없이, 요청한 형식의 내용만 간결하게 쓰세요.)";
 async function callLLMRaw(prompt, { json=true, maxTokens=1500, cfg } = {}){
   if (!/간결하게 쓰세요/.test(prompt) && prompt.length > 200) prompt += BRIEF;
+  prompt += POLITE;
   const P = cfg.provider, key = cfg.key, model = cfg.model || PROVIDERS[P].def;
   const fp = fastParams(P, model);
   let res, data, text;
