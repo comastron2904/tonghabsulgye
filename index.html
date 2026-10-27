@@ -397,6 +397,16 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .ri-ed{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:1px 8px}
 .ri-text{font-size:15px;font-weight:600;line-height:1.7;padding:4px 6px;border:1px solid transparent;border-radius:12px;white-space:pre-wrap;cursor:text;text-wrap:pretty}
 .ri-text:hover{border-color:var(--line)} .ri-text:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.rg-box{border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;margin-bottom:12px;background:var(--surface)}
+.rg-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.rg-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rg-c{font-size:13px;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px 11px}
+.rg-g{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:3px 6px 3px 12px}
+.rg-g b{font-size:13px;color:var(--accent);outline:none;border-bottom:1px dashed transparent}
+.rg-g b:focus{border-bottom-color:var(--accent)}
+.rg-g .rg-m{font-size:12px;color:var(--muted)}
+.rg-g.off{background:transparent;border-style:dashed;padding-left:6px}
+.rg-note{font-size:12px;color:var(--muted);margin:6px 0 0}
 .ri-basis{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:4px;padding-left:6px;font-size:11.5px;color:var(--faint)}
 .ri-basis span{font-weight:600;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:0 6px}
 .ri-basis span.c{color:var(--accent);border-color:var(--accent-line);background:var(--accent-soft)}
@@ -2774,7 +2784,10 @@ JSON 하나만 답하세요: {"reply":"...","question":"...","tag":"...","focus"
 }
 /* 대화 진행 */
 function coachSay(text){ dlgOf().msgs.push({ role:"coach", text, t:nowT() }); }
+/* 재구성 단계에 들어서면(알림이 나왔거나 재구성 문장이 있으면) 질문을 더 만들지 않아요 */
+const qStopped = d => !!(d && (d.notified || riOf()));
 async function coachAskNext(focus, preset){
+  if (qStopped(dlgOf())){ dlgOf().pending = null; return; }
   const d = dlgOf(), q = preset !== undefined ? preset : await getNextQuestion(focus);
   if (!q){ coachSay(focus ? `${FOCUS_NAME[focus]} 쪽 예시 질문은 모두 드렸어요. 더 떠오르는 생각은 자유롭게 적어 주세요.` : "준비한 예시 질문을 모두 드렸어요. 더 떠오르는 생각은 자유롭게 적어 주세요. 자유 메모로 기록할게요."); d.pending = null; return; }
   d.used.push(q.key);
@@ -2799,7 +2812,7 @@ async function teacherSend(text){
     if (!d.notified && !riOf() && riReadiness(d).ready){
       d.notified = true;
       d.msgs.push({ role:"coach", kind:"ready", t:nowT(),
-        text:"좋은 삶·공동체·성장과 수업·평가에 대한 이야기가 충분히 모였어요. 지금까지의 답과 고른 핵심 개념을 종합해 핵심 아이디어를 재구성해 볼까요? 질문은 계속 이어 갈 수도 있어요." });
+        text:"좋은 삶·공동체·성장과 수업·평가에 대한 이야기가 충분히 모였어요. 이제 질문은 여기까지 할게요. 지금까지의 답과 고른 핵심 개념을 종합해 핵심 아이디어를 재구성해 볼까요? 더 남기실 생각은 자유롭게 적어 주시면 메모로 기록할게요." });
     }
     await coachAskNext(undefined, rn.next);
   } else {
@@ -2871,7 +2884,7 @@ function intentLogHtml(a){
   const ana = `<details class="ana-wrap"><summary>기록 분석 보기</summary><div class="ana-grid">
       <div class="ana-box"><span class="ana-k">주제별로 얼마나 이야기했나</span>
         ${r.byFocus.map(f=>`<div class="bar-row"><span class="bar-l">${f.name}</span><span class="bar"><i class="${f.k}" style="width:${f.n/maxN*100}%"></i></span><span class="bar-n">${f.n}</span></div>`).join("")}
-        ${r.byFocus.some(f=>!f.n)?`<div class="ana-empty">${r.byFocus.filter(f=>!f.n).map(f=>`<button class="mini" type="button" data-asklens="${f.k}">${f.name} 질문 받기</button>`).join("")}</div>`:""}</div>
+        ${r.byFocus.some(f=>!f.n) && !qStopped(d)?`<div class="ana-empty">${r.byFocus.filter(f=>!f.n).map(f=>`<button class="mini" type="button" data-asklens="${f.k}">${f.name} 질문 받기</button>`).join("")}</div>`:""}</div>
       <div class="ana-box"><span class="ana-k">자주 나온 낱말 <span class="ana-sub">이 영역의 개념어 기준</span></span>
         <div class="kw">${r.words.length?r.words.map(([w,c])=>`<span class="kw-chip">${esc(w)}${c>1?`<b>${c}</b>`:""}</span>`).join(""):`<span class="ana-none">아직 없어요</span>`}</div>
         <span class="ana-k" style="margin-top:8px">핵심 개념과의 연결</span>
@@ -2890,11 +2903,11 @@ function chatHtml(){
     : `<div class="msg teacher"><div class="bubble">${esc(m.text)}</div></div>`).join("");
   return `<div class="chat">
     <div class="thread" id="thread" aria-live="polite">${msgs}</div>
-    <div class="quick"><span class="quick-k">주제</span>
+    ${qStopped(d) ? `<div class="quick"><span class="quick-k">질문을 마쳤어요. 적어 주시는 내용은 메모로 기록돼요.</span></div>` : `<div class="quick"><span class="quick-k">주제</span>
       ${THEMES.map(k=>`<button class="chip ${k}" type="button" data-asklens="${k}">${FOCUS_NAME[k]}</button>`).join("")}
       <span class="quick-k">설계</span>
       ${DESIGNS.map(k=>`<button class="chip ${k}" type="button" data-asklens="${k}">${FOCUS_NAME[k]}</button>`).join("")}
-      ${d.pending?`<button class="chip ghost" type="button" data-icact="skip">건너뛰기</button>`:""}</div>
+      ${d.pending?`<button class="chip ghost" type="button" data-icact="skip">건너뛰기</button>`:""}</div>`}
     <form class="composer" id="composer"><label for="chatInput" class="sr-only">코치에게 답하기</label>
       <textarea id="chatInput" rows="1" placeholder="${d.pending?"질문에 답해 주세요 (Enter로 보내기)":"자유롭게 적어 주세요. 자유 메모로 기록돼요."}"></textarea>
       <button class="send" type="submit" aria-label="보내기"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
@@ -2944,14 +2957,14 @@ ${ctxFor("idea", ctx)}
 
 규칙
 - 핵심 아이디어는 단원이 끝난 뒤에도 남는 일반화된 이해를 한 문장으로 씁니다 (교육과정 핵심 아이디어 문체: "~은 ~하는 데 바탕이 된다/기여한다").
-- 고른 핵심 개념을 문장 안에 넣고, 교사의 답에 드러난 좋은 삶·공동체·성장의 의도를 한 문장에 함께 녹입니다.
+- 핵심 개념(concepts: 비슷한 개념은 이미 상위 개념으로 묶어 둔 목록)을 문장 안에 넣고, 교사의 답에 드러난 좋은 삶·공동체·성장의 의도를 한 문장에 함께 녹입니다.
 - 근거가 된 답 번호(history의 순서, 1부터)와 개념을 basis에 적습니다.
 - JSON 하나만 답하세요: {"text":"...","basis":{"qa":[1,2],"concepts":["..."]}}`;
 }
 function reconstructIdeasExample(){
   const S = sel(), d = dlgOf(), a = curArea();
   const log = d.log.filter(x=>x.focus!=="memo");
-  const C = pickedConceptNames().length ? pickedConceptNames() : (S.concepts ? S.concepts.list.slice(0,2).map(c=>c.text) : [a.k[0]]);
+  const C = riConcepts().length ? riConcepts() : (S.concepts ? S.concepts.list.slice(0,2).map(c=>c.text) : [a.k[0]]);
   const c1 = C[0], c2 = C[1] && C[1]!==C[0] ? C[1] : null;
   const textOf = k => log.filter(x=>x.focus===k).map(x=>x.a).join(" ");
   // 공동체: 답에 나온 대상 / 성장: '~ 사람' 앞 꾸밈말
@@ -2964,16 +2977,90 @@ function reconstructIdeasExample(){
 }
 /* ▼ API 연결 지점 */
 async function getReconstructedIdeas(){
-  return viaAI("핵심 아이디어 재구성", buildIdeaPrompt(designContext()),
+  const ctx = designContext(); ctx.concepts = riConcepts();
+  return viaAI("핵심 아이디어 재구성", buildIdeaPrompt(ctx),
     r => r && r.text ? { text:String(r.text), basis:{ qa:(r.basis&&r.basis.qa||[]).map(Number).filter(Boolean), concepts:(r.basis&&r.basis.concepts||[]).map(String) } } : null,
     () => reconstructIdeasExample());
 }
+/* ---------- 재구성 전: 핵심 개념을 상위 개념으로 묶기 ----------
+   고른 핵심 개념 가운데 하나의 상위 개념으로 함께 표현할 수 있는 2개 이상을 묶어 개수를 줄여요.
+   묶을 수 없는 개념은 그대로 둬요. 교사는 묶음마다 '풀기'로 되돌리거나 상위 개념 이름을 고칠 수 있어요.
+   ▼ API 연결 지점: getConceptGroups(names) */
+const HYPER = {
+  "설계":"기술적 문제 해결","시공":"기술적 문제 해결","제작":"기술적 문제 해결","문제 해결":"기술적 문제 해결",
+  "안전":"안전과 건강","건강":"안전과 건강","영양":"안전과 건강",
+  "자기 이해":"자아 정체성","정체성":"자아 정체성","자아":"자아 정체성",
+  "주도성":"자기 주도성","자립":"자기 주도성","자기주도성":"자기 주도성",
+  "책임":"책임과 윤리","윤리":"책임과 윤리",
+  "협력":"공동체 역량","공감":"공동체 역량","소통":"공동체 역량","존중":"공동체 역량","배려":"공동체 역량","의사소통":"공동체 역량",
+  "환경":"지속가능성","자원":"지속가능성","생태":"지속가능성","순환":"지속가능성","친환경":"지속가능성",
+  "미래":"변화와 미래","변화":"변화와 미래","혁신":"변화와 미래","융합":"변화와 미래",
+  "구조":"구조와 기능","기능":"구조와 기능",
+  "관계":"관계와 상호작용","상호작용":"관계와 상호작용","상호의존":"관계와 상호작용",
+};
+function conceptGroupsExample(names){
+  const by = new Map();
+  names.forEach(n=>{ let h = HYPER[n];
+    if (!h){ const tail = n.split(/\s+/).pop(); const sib = names.find(m=>m!==n && m.split(/\s+/).pop()===tail && tail.length>=2); if (sib) h = tail; }
+    if (h){ if (!by.has(h)) by.set(h, []); by.get(h).push(n); } });
+  return { groups: [...by.entries()].filter(([,m])=>m.length>=2).map(([name,members])=>({ name, members })) };
+}
+async function getConceptGroups(names){
+  return viaAI("핵심 개념 묶기", `아래는 교사가 고른 단원의 핵심 개념입니다 (중학교 ${cur().name} '${curArea().name}').
+[핵심 개념] ${names.join(", ")}
+
+핵심 아이디어를 재구성하기 전에, 하나의 상위 개념으로 함께 표현할 수 있는 개념 2개 이상을 묶어 개수를 줄이세요.
+- 묶음의 이름은 멤버를 모두 아우르는 상위 개념(짧은 명사구)으로 씁니다 (예: '안전', '건강' → '안전과 건강' 또는 '건강한 삶').
+- 의미가 실제로 포함 관계이거나 같은 범주일 때만 묶습니다. 억지로 묶지 않고, 묶을 수 없는 개념은 groups에 넣지 않습니다.
+- 한 개념은 한 묶음에만 들어갑니다. 멤버는 [핵심 개념]의 표현을 그대로 씁니다.
+JSON 하나만 답하세요: {"groups":[{"name":"상위 개념","members":["개념1","개념2"]}]}`,
+    r => r && Array.isArray(r.groups) ? { groups: r.groups.map(g=>({ name:String(g.name||"").trim(), members:(g.members||[]).map(String).filter(m=>names.includes(m)) }))
+          .filter(g=>g.name && g.members.length>=2) } : null,
+    () => conceptGroupsExample(names), { maxTokens:400 });
+}
+const rgKey = () => pickedConceptNames().join("|");
+function rgOf(){ const S = sel(); return S.riGroup && S.riGroup.src === rgKey() ? S.riGroup : null; }
+async function runGroups(){
+  const S = sel(), names = pickedConceptNames(); rgUI.busy = true; renderMain();
+  try { const r = await getConceptGroups(names); const used = new Set();
+    const groups = r.groups.map(g=>({ name:g.name, members:g.members.filter(m=>!used.has(m) && used.add(m)) })).filter(g=>g.members.length>=2);
+    S.riGroup = { src: rgKey(), groups };
+  } finally { rgUI.busy = false; }
+  persist(); renderMain();
+}
+const rgUI = { busy:false };
+/* 재구성에 쓸 핵심 개념: 켜진 묶음은 상위 개념 하나로, 나머지는 그대로 */
+function riConcepts(){
+  const names = pickedConceptNames(), g = rgOf(); if (!g) return names;
+  const out = [], done = new Set();
+  names.forEach(n=>{ const grp = g.groups.find(x=>!x.off && x.members.includes(n));
+    if (grp){ if (!done.has(grp)){ done.add(grp); out.push(grp.name); } } else out.push(n); });
+  return out;
+}
+function rgBoxHtml(){
+  const names = pickedConceptNames(); if (!names.length) return "";
+  const g = rgOf();
+  const inG = n => g && g.groups.some(x=>!x.off && x.members.includes(n));
+  const body = rgUI.busy ? `<div class="ce-status run"><span class="thinking">상위 개념으로 묶을 수 있는지 살펴보는 중</span></div>`
+    : !g ? `<div class="rg-chips">${names.map(n=>`<span class="rg-c">${esc(n)}</span>`).join("")}</div>`
+    : `<div class="rg-chips">${g.groups.map((x,i)=>`<span class="rg-g ${x.off?'off':''}">${x.off ? x.members.map(m=>`<span class="rg-c">${esc(m)}</span>`).join("")
+          : `<b contenteditable="plaintext-only" role="textbox" tabindex="0" data-rgname="${i}" id="rgn-${selKey()}-${i}" aria-label="상위 개념 이름 고치기">${esc(x.name)}</b><span class="rg-m">← ${x.members.map(esc).join(", ")}</span>`}
+          <button class="mini" type="button" data-rg="toggle" data-i="${i}">${x.off?"묶기":"풀기"}</button></span>`).join("")}
+        ${names.filter(n=>!g.groups.some(x=>x.members.includes(n))).map(n=>`<span class="rg-c">${esc(n)}</span>`).join("")}</div>
+       <p class="rg-note">${g.groups.length ? `핵심 개념 ${names.length}개 → ${riConcepts().length}개로 재구성에 써요. 상위 개념 이름은 눌러서 고칠 수 있어요.` : "상위 개념으로 묶을 만한 개념이 없어 그대로 써요."}</p>`;
+  return `<div class="rg-box"><div class="rg-head"><span class="ri-k">재구성에 쓸 핵심 개념</span><span class="sp"></span>
+      <button class="mini" type="button" data-rg="run" ${rgUI.busy?"disabled":""}>${g?"다시 묶어 보기":"상위 개념으로 묶기"}</button></div>
+    ${!g && !rgUI.busy ? `<p class="rg-note">재구성할 때 하나의 상위 개념으로 표현할 수 있는 개념 2개 이상을 묶어 개수를 줄여요.</p>` : ""}${body}</div>`;
+}
+
 const rui = { confirm:false, busy:false };
 async function makeIdeas(){
   const S = sel(), d = dlgOf();
   rui.busy = true; rui.confirm = false; renderMain();
+  if (!rgOf()) await runGroups();
+  rui.busy = true; renderMain();
   const r = await getReconstructedIdeas();
-  S.ri = { text:r.text, basis:r.basis, edited:false, status:"review", logN:d.log.length, t:nowT(), base:riBaseNow() };
+  S.ri = { text:r.text, basis:r.basis, edited:false, status:"review", logN:d.log.length, t:nowT(), base:riBaseNow(), cons:riConcepts().join("|") };
   rui.busy = false;
   d.msgs.push({ role:"coach", kind:"review", t:nowT(), text:`지금까지의 답 ${d.log.length}개와 핵심 개념을 종합해 핵심 아이디어를 한 문장으로 재구성했어요.\n\n“${r.text}”\n\n이 문장을 수정하시겠어요?` });
   persist(); renderSide(); renderMain(); renderNotes();
@@ -3007,15 +3094,17 @@ function riHtml(a){
       ? `<div class="ri-ready"><b>재구성할 준비가 됐어요.</b><p>설계 코치와 나눈 답 ${rd.total}개와 고른 핵심 개념을 종합해 새 핵심 아이디어를 한 문장으로 만들어 드려요.</p>
          <button class="btn primary sm" type="button" data-riact="make" ${rui.busy?"disabled":""}>${sparkSvg}${rui.busy?"만드는 중…":"핵심 아이디어 재구성하기"}</button></div>`
       : `<p class="ce-head-note">설계 코치와의 대화가 아래 조건을 채우면 재구성을 알려 드려요.</p>`;
-    return `<section id="riSec">${head("")}${prog}${body}${orig}</section>`;
+    return `<section id="riSec">${head("")}${prog}${rd.ready ? rgBoxHtml() : ""}${body}${orig}</section>`;
   }
   const newer = d ? d.log.length - ri.logN : 0;
   let status = "";
   if (rui.confirm) status = `<div class="ce-status warn">지금 문장을 새 초안으로 바꿔요. 직접 고친 내용도 사라져요.<span class="sp"></span><button class="mini" type="button" data-riact="go">바꾸기</button><button class="mini" type="button" data-riact="cancel">취소</button></div>`;
   else if (newer > 0) status = `<div class="ce-status">초안을 만든 뒤 기록이 ${newer}개 더 쌓였어요. 필요하면 다시 재구성할 수 있어요.</div>`;
+  else if (ri.cons !== undefined && ri.cons !== riConcepts().join("|") && !rgUI.busy) status = `<div class="ce-status warn">재구성에 쓸 핵심 개념이 바뀌었어요. 반영하려면 '다시 재구성'을 눌러 주세요.</div>`;
   const bs = ri.basis || { qa:[], concepts:[] };
   return `<section id="riSec">${head(`<button class="btn sm" type="button" data-riact="again">${sparkSvg}다시 재구성</button>`)}
     <p class="ce-head-note">설계 코치와 나눈 답과 고른 핵심 개념을 종합한 한 문장이에요. 읽어 보고 수정할지 정해 주세요. AI 연결 전이라 지금은 예시 문장 틀로 만들어요.</p>
+    ${rgBoxHtml()}
     ${status}
     <div class="ri-item one ${ri.status}">
       <div class="ri-top"><span class="ri-k">재구성한 핵심 아이디어</span>
@@ -4878,6 +4967,11 @@ document.addEventListener("click", e=>{
   if (kc){ const K = sel().kq, id = kc.dataset.kq;
     K.picked = K.picked.includes(id) ? K.picked.filter(x=>x!==id) : K.list.filter(c=>c.id===id || K.picked.includes(c.id)).map(c=>c.id);
     persist(); renderSide(); renderMain(); const el = document.querySelector(`[data-kq="${id}"]`); if (el) el.focus({ preventScroll:true }); return; }
+  const rgb = e.target.closest("[data-rg]");
+  if (rgb){ if (rgUI.busy || rui.busy) return;
+    if (rgb.dataset.rg==="run"){ AI_FRESH = true; runGroups(); }
+    else if (rgb.dataset.rg==="toggle"){ const g = rgOf(), x = g && g.groups[+rgb.dataset.i]; if (x){ x.off = !x.off; persist(); renderMain(); } }
+    return; }
   const ra = e.target.closest("[data-riact]");
   if (ra){ const act = ra.dataset.riact, S = sel();
     if (act==="make"){ if (riOf() && riOf().text.trim()){ rui.confirm = true; renderMain(); $("#riSec")?.scrollIntoView({ block:"start", behavior:"smooth" }); } else makeIdeas(); }
@@ -4986,6 +5080,7 @@ document.addEventListener("submit", e=>{
 });
 document.addEventListener("input", e=>{
   const t = e.target;
+  if (t.dataset && t.dataset.rgname !== undefined){ const g = rgOf(), x = g && g.groups[+t.dataset.rgname]; if (x){ x.name = t.textContent.trim() || x.name; persist(); } return; }
   if (t.dataset && t.dataset.ans){ const it = dlgOf().log.find(x=>x.id===t.dataset.ans); if (it){ it.a = t.textContent; persist(); } return; }
   if (t.dataset && t.dataset.ptmo !== undefined){ ptmOf().other = t.value; persist(); return; }
   if (t.dataset && t.dataset.legname){ const g = leOf().groups.find(x=>x.id===t.dataset.legname); if (g){ g.name = t.textContent; g.edited = true; syncCeFromLe(); persist(); } return; }
@@ -5034,6 +5129,7 @@ document.addEventListener("focusout", e=>{
   const t = e.target;
   if (t.dataset && t.dataset.ans){ renderMain(); return; }
   if (t.dataset && t.dataset.ri){ renderSide(); return; }
+  if (t.dataset && t.dataset.rgname !== undefined){ renderMain(); return; }
   if (t.dataset && t.dataset.evtext){ const x = sel().ev.items.find(y=>y.id===t.dataset.evtext); if (x && !x.text.trim()){ x.text = ""; x.textEd = false; } persist(); renderSide(); renderMain(); return; }
   if (t.dataset && (t.dataset.evund || t.dataset.evobj || t.dataset.evverb)){ renderSide(); return; }
   if (t.dataset && t.dataset.ptmo !== undefined){ renderSide(); renderMain(); return; }
