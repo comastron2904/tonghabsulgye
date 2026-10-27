@@ -1879,7 +1879,7 @@ function leHtml(a, modeBar){
 function leFind(id){ const L = leOf(); for (const g of L.groups){ const i = g.items.findIndex(x=>x.id===id); if (i>=0) return { g, i, it:g.items[i] }; } return null; }
 function leChanged(rerender = true){ syncCeFromLe(); persist(); renderSide(); if (rerender) refreshCe(); }
 /* 내용 요소 만드는 방식 고르기: 국가 내용 체계 / 성취기준 분석·유목화(테스트) */
-const ceModeNow = () => (sel().ceMode === "le" || sel().ceMode === "std") ? "std" : "curr";
+const ceModeNow = () => "curr";  /* 성취기준 추출(테스트)은 폐기: 교육과정 내용체계 가져오기만 써요 */
 /* ---------- (테스트) 성취기준에서 바로 추출: 지식·이해 / 과정·기능 / 가치·태도 표 형식 ----------
    ▼ API 연결 지점: getStdCE(stds) */
 function stdCEExample(stds){
@@ -1927,20 +1927,22 @@ function ceModeBar(){
 }
 function contentsHtml(a){
   const mode = ceModeNow();
+  const S0 = sel();
+  if (S0.ceMode === "std" || S0.ceMode === "le"){ S0.ce = S0.ceCurr || null; delete S0.ceCurr; delete S0.ceStd; delete S0.ceMode; save(); }
   const S = sel(), ce = ceOf(), n = ceCount(ce);
   const stale = n && ce.from && !sameSet(ce.from, S.stds);
   let status = "";
-  if (ai.running) status = `<div class="ce-status run"><span class="thinking" data-sec="">${aiOn() ? PROVIDERS[AI.provider].name + "가 " : ""}${mode==="std" ? `고른 성취기준 ${S.stds.length}개를 분석하는 중` : `내용 체계에서 고른 성취기준 ${S.stds.length}개와 관련된 항목을 고르는 중`}</span><span class="sp"></span><span class="ce-sec">보통 5~10초쯤 걸려요</span></div>`;
-  else if (ai.confirm) status = `<div class="ce-status warn">내용 체계에서 다시 가져와요. 직접 고친 내용도 사라져요.<span class="sp"></span><button class="mini" type="button" data-ceact="go">바꾸기</button><button class="mini" type="button" data-ceact="cancel">취소</button></div>`;
+  if (ai.running) status = `<div class="ce-status run"><span class="thinking" data-sec="">${aiOn() ? PROVIDERS[AI.provider].name + "가 " : ""}${mode==="std" ? `고른 성취기준 ${S.stds.length}개를 분석하는 중` : `교육과정 내용체계에서 고른 성취기준 ${S.stds.length}개와 관련된 항목을 고르는 중`}</span><span class="sp"></span><span class="ce-sec">보통 5~10초쯤 걸려요</span></div>`;
+  else if (ai.confirm) status = `<div class="ce-status warn">교육과정 내용체계에서 다시 가져와요. 직접 고친 내용도 사라져요.<span class="sp"></span><button class="mini" type="button" data-ceact="go">바꾸기</button><button class="mini" type="button" data-ceact="cancel">취소</button></div>`;
   else if (ai.err) status = `<div class="ce-status warn">${esc(ai.err)}</div>`;
   else if (stale) status = `<div class="ce-status warn">내용 요소를 가져온 뒤에 고른 성취기준이 바뀌었어요. 필요하면 다시 가져오세요.</div>`;
   const canAI = true;
   const btn = !S.stds.length ? "" : canAI
-    ? `<button class="btn ${n?'':'primary'} sm" type="button" data-ceact="run" ${ai.running?"disabled":""}>${sparkSvg}${ai.running ? (mode==="std" ? "추출하는 중…" : "가져오는 중…") : mode==="std" ? (n?"성취기준에서 다시 추출하기":"성취기준에서 추출하기") : (n?"내용 체계에서 다시 가져오기":"내용 체계에서 가져오기")}</button>`
+    ? `<button class="btn ${n?'':'primary'} sm" type="button" data-ceact="run" ${ai.running?"disabled":""}>${sparkSvg}${ai.running ? (mode==="std" ? "추출하는 중…" : "가져오는 중…") : mode==="std" ? (n?"성취기준에서 다시 추출하기":"성취기준에서 추출하기") : (n?"교육과정 내용체계에서 다시 가져오기":"교육과정 내용체계에서 가져오기")}</button>`
     : "";
-  const note = !S.stds.length ? "성취기준을 먼저 고르면, 그 성취기준과 관련된 국가 교육과정 내용 체계 항목을 가져올 수 있어요."
+  const note = !S.stds.length ? "위에서 성취기준을 고르면, 그 성취기준과 관련된 교육과정 내용체계 항목을 가져올 수 있어요."
     : mode==="std" ? `고른 성취기준 문장을 분석해 학습 내용과 수행 요구를 나누어 뽑고, 지식·이해(내용) · 과정·기능(내용 + ~하기) · 가치·태도로 정리해요. 성취기준의 의미와 수행 수준을 지키고, 성취기준에 없는 내용은 더하지 않아요. 고른 성취기준은 모두 반영되고, 항목 아래에 출처 성취기준 코드가 보여요. ${aiOn() ? "AI가 성취기준을 분석해요." : "AI 연결 전이라 지금은 규칙으로 나눠요."} 각 항목은 눌러서 고치고, ×로 지우고, 칸 아래에서 직접 더할 수 있어요.`
-    : canAI ? `고른 성취기준마다 관련된 국가 교육과정 내용 체계 항목을 원문 그대로 가져와요 (새로 만들지 않아요). 성취기준마다 지식·이해, 과정·기능, 가치·태도가 적어도 하나씩 연결되고, 항목 아래에 연결된 성취기준 코드가 보여요. ${aiOn() ? "AI가 관련 항목을 골라요." : "낱말이 겹치는 정도로 관련 항목을 골라요."} 각 항목은 눌러서 고치고, ×로 지우고, 칸 아래에서 직접 더할 수 있어요.`
+    : canAI ? `고른 성취기준과 관련된 항목을 2022 개정 교육과정 내용체계 표에서 원문 그대로 가져와요. 성취기준마다 지식·이해 · 과정·기능 · 가치·태도에 하나 이상씩 연결되고, 항목 아래 코드로 어느 성취기준과 이어지는지 볼 수 있어요. 가져온 항목은 눌러서 고치고, ×로 빼고, 칸 아래에서 더할 수 있어요.${aiOn() ? "" : " (AI 연결 전에는 낱말이 겹치는 정도로 관련 항목을 골라요.)"}`
     : "이 화면에서는 AI를 쓸 수 없어요. 각 칸 아래에 직접 써서 채워 주세요.";
   const cols = CE_CATS.map(([k,t,rule])=>`
     <div class="ccol ${k}"><h4>${t}<span class="cnt">${ce[k].length}</span></h4>
@@ -1950,7 +1952,6 @@ function contentsHtml(a){
     </div>`).join("");
   return `<section id="ceSec">
     <div class="block-head"><h3>내용 요소</h3><span class="n">${n}개</span><span class="sp"></span>${btn}</div>
-    ${ceModeBar()}
     <p class="ce-head-note">${note}</p>
     ${status}
     <div class="contents">${cols}</div>
