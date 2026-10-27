@@ -885,6 +885,7 @@ body{background-color:var(--bg);background-image:radial-gradient(at 0% 0%,rgba(2
 .dd-o{border-radius:12px}
 /* 알림·대화창 */
 .toast{border-radius:18px}
+.ce-src .cur{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-line)}
 .opt-tag{font-size:11px;font-weight:700;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:1px 9px}
 .intent-lead{margin:-4px 0 8px}
 .np-head h2{white-space:nowrap;flex:none}
@@ -1672,9 +1673,9 @@ function recommendFor(intent, area){
 }
 /* ---------- 2. 설계 · 내용 요소 (AI 추출 + 직접 수정) ---------- */
 const CE_CATS = [
-  ["k","지식·이해","단원의 핵심 개념·원리·사실·이론이에요. 예) 피지컬 컴퓨팅의 구성, 자료형"],
-  ["s","과정·기능","지식을 바탕으로 하는 방법·사고 작용·절차·기술이에요. '~하기'로 적어요."],
-  ["v","가치·태도","학습 과정에서 나타나는 바람직한 태도·성향·가치관·감정적 수용성이에요."] ];
+  ["k","지식·이해","단원의 핵심 개념·원리·사실·이론 (내용 체계 원문)"],
+  ["s","과정·기능","지식을 바탕으로 하는 방법·사고 작용·절차·기술 (내용 체계 원문)"],
+  ["v","가치·태도","바람직한 태도·성향·가치관·감정적 수용성 (내용 체계 원문)"] ];
 const ai = { running:false, ctl:null, err:"", confirm:false };
 const ceOf = () => (sel().ce ||= { k:[], s:[], v:[], from:null });
 const ceCount = ce => ce.k.length + ce.s.length + ce.v.length;
@@ -1691,16 +1692,16 @@ function contentsHtml(a){
   const S = sel(), ce = ceOf(), n = ceCount(ce);
   const stale = n && ce.from && !sameSet(ce.from, S.stds);
   let status = "";
-  if (ai.running) status = `<div class="ce-status run"><span class="thinking" data-sec="">${aiOn() ? PROVIDERS[AI.provider].name + "가 " : ""}고른 성취기준 ${S.stds.length}개에서 내용 요소를 뽑는 중</span><span class="sp"></span><span class="ce-sec">보통 10~20초쯤 걸려요</span></div>`;
-  else if (ai.confirm) status = `<div class="ce-status warn">지금 목록을 새 예시로 바꿔요. 직접 고친 내용도 사라져요.<span class="sp"></span><button class="mini" type="button" data-ceact="go">바꾸기</button><button class="mini" type="button" data-ceact="cancel">취소</button></div>`;
+  if (ai.running) status = `<div class="ce-status run"><span class="thinking" data-sec="">${aiOn() ? PROVIDERS[AI.provider].name + "가 " : ""}내용 체계에서 고른 성취기준 ${S.stds.length}개와 관련된 항목을 고르는 중</span><span class="sp"></span><span class="ce-sec">보통 5~10초쯤 걸려요</span></div>`;
+  else if (ai.confirm) status = `<div class="ce-status warn">내용 체계에서 다시 가져와요. 직접 고친 내용도 사라져요.<span class="sp"></span><button class="mini" type="button" data-ceact="go">바꾸기</button><button class="mini" type="button" data-ceact="cancel">취소</button></div>`;
   else if (ai.err) status = `<div class="ce-status warn">${esc(ai.err)}</div>`;
-  else if (stale) status = `<div class="ce-status warn">예시를 채운 뒤에 고른 성취기준이 바뀌었어요. 필요하면 예시를 다시 채우세요.</div>`;
+  else if (stale) status = `<div class="ce-status warn">내용 요소를 가져온 뒤에 고른 성취기준이 바뀌었어요. 필요하면 다시 가져오세요.</div>`;
   const canAI = true;
   const btn = !S.stds.length ? "" : canAI
-    ? `<button class="btn ${n?'':'primary'} sm" type="button" data-ceact="run" ${ai.running?"disabled":""}>${sparkSvg}${ai.running ? "뽑는 중…" : aiOn() ? (n?"AI로 다시 뽑기":"AI로 내용 요소 뽑기") : (n?"예시 다시 채우기":"내용 요소 예시 채우기")}</button>`
+    ? `<button class="btn ${n?'':'primary'} sm" type="button" data-ceact="run" ${ai.running?"disabled":""}>${sparkSvg}${ai.running ? "가져오는 중…" : (n?"내용 체계에서 다시 가져오기":"내용 체계에서 가져오기")}</button>`
     : "";
-  const note = !S.stds.length ? "성취기준을 먼저 고르면 그 문장에서 내용 요소를 뽑을 수 있어요."
-    : canAI ? "AI 연결 전이라 성취기준별로 미리 정리해 둔 예시를 보여 드려요. 각 항목은 눌러서 고치고, ×로 지우고, 칸 아래에서 직접 더할 수 있어요."
+  const note = !S.stds.length ? "성취기준을 먼저 고르면, 그 성취기준과 관련된 국가 교육과정 내용 체계 항목을 가져올 수 있어요."
+    : canAI ? `고른 성취기준마다 관련된 국가 교육과정 내용 체계 항목을 원문 그대로 가져와요 (새로 만들지 않아요). 성취기준마다 지식·이해, 과정·기능, 가치·태도가 적어도 하나씩 연결되고, 항목 아래에 연결된 성취기준 코드가 보여요. ${aiOn() ? "AI가 관련 항목을 골라요." : "낱말이 겹치는 정도로 관련 항목을 골라요."} 각 항목은 눌러서 고치고, ×로 지우고, 칸 아래에서 직접 더할 수 있어요.`
     : "이 화면에서는 AI를 쓸 수 없어요. 각 칸 아래에 직접 써서 채워 주세요.";
   const cols = CE_CATS.map(([k,t,rule])=>`
     <div class="ccol ${k}"><h4>${t}<span class="cnt">${ce[k].length}</span></h4>
@@ -1714,6 +1715,88 @@ function contentsHtml(a){
     ${status}
     <div class="contents">${cols}</div>
   </section>`;
+}
+/* =====================================================================
+   내용 요소 = 국가 교육과정 내용 체계에서 '그대로' 가져와요 (새로 만들지 않아요)
+   · 고른 성취기준마다, 그 성취기준이 속한 영역의 내용 체계(지식·이해 / 과정·기능 / 가치·태도) 가운데
+     관련 있는 항목을 골라 원문 그대로 담아요.
+   · 성취기준마다 세 범주에 적어도 하나씩 연결되게 해요.
+   · AI가 연결돼 있으면 AI가 관련 항목 '번호'만 고르고, 연결이 없으면 낱말이 겹치는 정도로 골라요.
+   ▼ API 연결 지점: getOfficialCE(stds)
+   ===================================================================== */
+function areaOfStd(n){
+  const a = curArea(), parts = a.multi ? a.parts : [a], num = parseInt(String(n).split("-")[0], 10);
+  return parts.find(p=>Number(p.num)===num) || parts[0];
+}
+const ceBigrams = t => { t = String(t).replace(/[^가-힣A-Za-z0-9]/g,""); const out = new Set(); for (let i=0;i<t.length-1;i++) out.add(t.slice(i,i+2)); return out; };
+const ceToks = t => new Set([...(String(t).match(/[가-힣A-Za-z]{2,}/g) || []).map(w=>w.replace(/(을|를|은|는|이|가|의|와|과|에|에서|으로|로|하기|하고|하는|한다|하여|함)$/,"")).filter(w=>w.length>=2)]);
+function ceScore(item, ref){
+  const it = ceToks(item), rt = ceToks(ref); let shared = 0; it.forEach(w=>{ if (rt.has(w) || [...rt].some(r=>r.includes(w) || w.includes(r))) shared++; });
+  const ib = ceBigrams(item), rb = ceBigrams(ref); let hit = 0; ib.forEach(b=>{ if (rb.has(b)) hit++; });
+  return shared * 2 + (ib.size ? hit / ib.size : 0);
+}
+const CE_PICK = { k:3, s:3, v:2 };
+function officialCEExample(stds){
+  const ex = EX_CE[state.subject] || {}, links = [];
+  stds.forEach(([n, text])=>{
+    const area = areaOfStd(n), e = ex[n], link = { code:n, k:[], s:[], v:[] };
+    ["k","s","v"].forEach((cat, ci)=>{
+      const ref = [text, ...(e ? [].concat(e[ci] || []) : [])].join(" ");
+      const ranked = area[cat].map((t, i)=>({ i, sc: ceScore(t, ref) })).sort((x,y)=>y.sc-x.sc);
+      const good = ranked.filter(r=>r.sc >= 1.4).slice(0, CE_PICK[cat]);
+      link[cat] = (good.length ? good : ranked.slice(0, 1)).map(r=>r.i);
+    });
+    links.push(link);
+  });
+  return { links };
+}
+/* 번호 → 원문 항목으로 묶어요. 같은 항목에 여러 성취기준이 이어지면 코드를 함께 달아요 */
+function buildOfficialCE(stds, links){
+  const out = { k:[], s:[], v:[] }, byKey = new Map();
+  const rule = officialCEExample(stds).links;
+  stds.forEach(([n], si)=>{
+    const area = areaOfStd(n), L = links.find(l=>l.code===n) || {}, R = rule[si];
+    ["k","s","v"].forEach(cat=>{
+      let idx = (L[cat] || []).filter(i=>Number.isInteger(i) && i>=0 && i<area[cat].length);
+      if (!idx.length) idx = R[cat];                                  // 빠진 범주는 규칙으로 채워 꼭 하나 이상
+      idx.forEach(i=>{ const text = area[cat][i], key = cat + "|" + area.num + "|" + i;
+        if (!byKey.has(key)){ const it = { text, codes:[], order: area.num * 1000 + i }; byKey.set(key, it); out[cat].push(it); }
+        const it = byKey.get(key); if (!it.codes.includes(n)) it.codes.push(n); });
+    });
+  });
+  ["k","s","v"].forEach(cat=>out[cat].sort((a,b)=>a.order-b.order));
+  return out;
+}
+function officialCEPrompt(stds){
+  const a = curArea(), parts = a.multi ? a.parts : [a];
+  const list = cat => parts.map(p=>p[cat].map((t,i)=>`  ${p.num}-${i+1}. ${t}`).join("\n")).join("\n");
+  return `당신은 2022 개정 교육과정에 따라 수업을 설계하는 중학교 교사를 돕습니다.
+아래 [고른 성취기준] 각각에 대해, [국가 교육과정 내용 체계]에서 관련 있는 항목의 번호만 고르세요. 문장을 새로 만들거나 고치지 않습니다.
+
+[고른 성취기준]
+${stds.map(([n,t])=>`[${fullCode(n)}] (영역 ${areaOfStd(n).num}) ${t}`).join("\n")}
+
+[국가 교육과정 내용 체계] (번호 = 영역번호-항목번호)
+지식·이해(k): 핵심 개념·원리·사실·이론
+${list("k")}
+과정·기능(s): 지식을 바탕으로 하는 방법·사고 작용·절차·기술
+${list("s")}
+가치·태도(v): 바람직한 태도·성향·가치관·감정적 수용성
+${list("v")}
+
+규칙
+- 성취기준마다 같은 영역의 항목에서 고르고, k·s·v 각각 1~${CE_PICK.k}개를 고릅니다. 모든 성취기준이 세 범주에 적어도 하나씩 연결되어야 합니다.
+- 번호는 "영역번호-항목번호" 꼴의 문자열로 씁니다.
+JSON 하나만 답하세요: {"links":[{"code":"${fullCode(stds[0] ? stds[0][0] : "01-01")}","k":["1-2"],"s":["1-1"],"v":["1-3"]}]}`;
+}
+async function getOfficialCE(stds){
+  const prefix = cur().prefix;
+  return viaAI("내용 요소 추출", officialCEPrompt(stds),
+    r => r && Array.isArray(r.links) && r.links.length ? { links: r.links.map(l=>{
+        const code = String(l.code||"").replace(/[\[\]\s]/g,"").replace(prefix,""), area = areaOfStd(code);
+        const conv = arr => (Array.isArray(arr) ? arr : []).map(x=>{ const m = String(x).match(/(\d+)\s*-\s*(\d+)/); return m && Number(m[1])===Number(area.num) ? Number(m[2]) - 1 : (Number.isFinite(+x) ? +x - 1 : -1); });
+        return { code, k:conv(l.k), s:conv(l.s), v:conv(l.v) }; }) } : null,
+    () => officialCEExample(stds), { maxTokens:800 });
 }
 function cePrompt(){
   const a = curArea(), S = sel(), c = cur();
@@ -1906,17 +1989,12 @@ async function runExtract(){
   if (aiOn()){ ai.running = true; ai.t0 = Date.now(); ai.err = ""; ai.confirm = false; refreshCe();
     tick = setInterval(()=>{ const el = $("#ceSec .ce-status.run .thinking"); if (el) el.dataset.sec = Math.round((Date.now()-ai.t0)/1000) + "초"; }, 1000); }
   const stds = a.stds.filter(([n])=>S.stds.includes(n));
-  const prefix = cur().prefix;
-  const r = await viaAI("내용 요소 추출", cePrompt(),
-    x => x && (x.k||x.s||x.v) ? Object.fromEntries(["k","s","v"].map(k=>[k, (x[k]||[]).map(it=>({ text:String(it.text||it||"").trim(),
-      codes:(it.codes||[]).map(c=>String(c).replace(/[\[\]\s]/g,"").replace(prefix,"")).filter(c=>S.stds.includes(c)) })).filter(it=>it.text).slice(0,6)])) : null,
-    () => extractContents(stds, a));
+  const r = await getOfficialCE(stds);
   if (tick) clearInterval(tick);
   ai.running = false;
-  const fixed = ceCover(ceSortCats(r, S.stds.length), stds, a);
-  const pick = arr => arr.map(x=>({ id:Math.random().toString(36).slice(2,9), text:x.text, codes:x.codes, ex:!aiOn() }));
-  S.ce = { k:pick(fixed.k), s:pick(fixed.s), v:pick(fixed.v), from:S.stds.slice() };
-  if (fixed.missing && fixed.missing.length && aiOn()) toast(`AI가 빠뜨린 성취기준 ${fixed.missing.map(n=>`[${fullCode(n)}]`).join(", ")}의 내용 요소를 채워 넣었어요. 필요하면 다듬어 주세요.`);
+  const got = buildOfficialCE(stds, r.links || []);
+  const pick = arr => arr.map(x=>({ id:Math.random().toString(36).slice(2,9), text:x.text, codes:x.codes, cur:true }));
+  S.ce = { k:pick(got.k), s:pick(got.s), v:pick(got.v), from:S.stds.slice(), src:"curriculum" };
   ai.confirm = false; ai.err = "";
   persist(); renderSide(); refreshCe();
 }
@@ -4031,7 +4109,7 @@ const AIC_KEY = "curri-aicache-v1", AIC_MAX = 80, AIC_SKIP = new Set(["설계 �
 let AI_FRESH = false;
 document.addEventListener("click", e=>{ const b = e.target.closest && e.target.closest("button");
   const isGo = !!b && [...b.attributes].some(x=>/^data-[a-z0-9]*act$/.test(x.name) && x.value==="go");   // 확인 창의 '바꾸기·새로 만들기'
-  AI_FRESH = !!b && (isGo || /다시 만들기|다시 뽑기|다시 제안|다시 채우기|새로 만들기|새로 제안|새로 뽑기/.test(b.textContent)); }, true);
+  AI_FRESH = !!b && (isGo || /다시 만들기|다시 뽑기|다시 제안|다시 채우기|다시 가져오기|다시 고르기|새로 만들기|새로 제안|새로 뽑기/.test(b.textContent)); }, true);
 function aicHash(t){ let h1 = 0x811c9dc5, h2 = 0; for (let i=0;i<t.length;i++){ const c = t.charCodeAt(i); h1 = Math.imul(h1 ^ c, 16777619) >>> 0; h2 = (h2 * 31 + c) >>> 0; } return h1.toString(36) + h2.toString(36) + t.length.toString(36); }
 function aicLoad(){ try { return JSON.parse(localStorage.getItem(AIC_KEY) || "null") || { m:{}, o:[] }; } catch(e){ return { m:{}, o:[] }; } }
 function aicGet(k){ const c = aicLoad(); return c.m[k]; }
