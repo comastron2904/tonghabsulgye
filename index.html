@@ -524,6 +524,35 @@ mark.km{background:var(--accent-soft)} mark.km.on{box-shadow:inset 0 -2px 0 var(
 .eq-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .eq-item{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:8px 8px 8px 10px}
 .eq-item .kr-pick{margin-top:4px}
+.eq-use{display:flex;flex-direction:column;gap:4px;flex:none;margin-top:2px}
+.eq-u{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:2px 10px;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+.eq-u:hover{border-color:var(--accent-line);color:var(--ink)}
+.eq-u.l.on{background:var(--s);border-color:var(--s);color:#fff}
+.eq-u.a.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.eq-always{flex:none;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:12px;margin-top:3px}
+.lp-qs{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:8px}
+.lp-q{display:inline-flex;align-items:center;gap:5px;max-width:100%;font-size:12px;line-height:1.4;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:2px 8px}
+.lp-q b{flex:none;font-size:10.5px;font-weight:700;color:#fff;background:var(--muted);border-radius:6px;padding:0 5px}
+.lp-q.big b{background:var(--accent)} .lp-q.fact b{background:var(--t)} .lp-q.concept b{background:var(--s)} .lp-q.debate b{background:var(--v)}
+.lp-q i{font-style:normal;color:var(--accent);font-weight:700}
+.lp-qpick{font-size:12px}
+.lp-qpick summary{cursor:pointer;color:var(--accent);font-weight:600;list-style:none;padding:2px 6px;border:1px dashed var(--accent-line);border-radius:8px}
+.lp-qpick summary::-webkit-details-marker{display:none}
+.lp-qlist{display:grid;gap:4px;margin-top:6px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.lp-qlist label{display:flex;gap:6px;align-items:flex-start;font-size:12px;cursor:pointer}
+.lp-qlist input{accent-color:var(--accent);margin-top:2px}
+.lp-qmap{border:1px solid var(--line);border-radius:var(--r-md);padding:10px 14px;margin-bottom:12px;background:var(--surface)}
+.lp-qmap summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--ink)}
+.lp-qmap ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.lp-qmap li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.lp-qmap .lp-qm{font-size:12px;color:var(--accent);font-weight:600;white-space:nowrap}
+.lp-qmap .lp-qm em{font-style:normal;color:var(--muted);font-weight:500}
+.lp-qmap li.miss .lp-qm{color:var(--warn,#c2410c)}
+@media (max-width:720px){ .lp-qmap li{grid-template-columns:1fr} .lp-qmap .lp-qm{white-space:normal} }
+.eq-count{display:flex;gap:12px;font-size:12.5px;color:var(--muted);margin:4px 0 8px}
+.eq-count b{color:var(--ink)}
+.pt-chip.aq{max-width:100%}
+.pt-chip.aq .eq-kind{margin-right:6px;font-style:normal}
 .eq-item.on{border-color:var(--done);box-shadow:inset 3px 0 0 var(--done)}
 .eq-big .eq-item.on{box-shadow:none}
 .eq-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
@@ -1419,7 +1448,7 @@ const STEPS = [
   { name:"설계", desc:"필요하면 구상하는 수업의 모습(설계 의도)을 적고, 핵심 아이디어와 성취기준을 골라 학생이 배울 내용을 구체화해요." } ];
 STEPS.push({ name:"개념 추출 및 핵심 아이디어 재구성", desc:"내용 요소에서 수업의 중심이 될 개념을 찾고, 설계 코치와의 대화로 교사의 의도를 다듬어 이 단원만의 핵심 아이디어로 재구성해요." });
 STEPS.push({ name:"핵심 질문 생성", desc:"재구성한 핵심 아이디어를 개념과 관계로 풀어 보고, 깊이 탐구할 초점을 정해 학생의 사고를 이끄는 핵심 질문을 만들어요." });
-STEPS.push({ name:"평가 요소 설계", desc:"고른 핵심 질문에 답하는 과정에서 학생이 드러내야 할 사고를 정하고, 이를 바탕으로 무엇을 어떻게 평가할지 평가 요소를 설계해요." });
+STEPS.push({ name:"평가 요소 설계", desc:"대표 핵심 질문에 답하는 과정에서 학생이 드러내야 할 사고를 정하고, 이를 바탕으로 평가 요소와 총괄평가 과제를 설계해요." });
 STEPS.push({ name:"차시별 수업 설계", desc:"단원을 몇 차시로 운영할지 정하고, 총괄평가 수행과제로 이어지도록 차시마다 배움·평가·피드백을 설계한 뒤, 형성평가 결과로 다음 차시를 어떻게 바꿀지 환류까지 계획해요." });
 const curStepGet = () => Math.min(state.step||0, STEPS.length-1);
 let curStep = curStepGet();
@@ -1596,7 +1625,7 @@ function renderSideRaw(){
       <div class="sub ${K&&K.list.length?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">① 개념 추출<b>${K?`핵심 개념 ${K.list.length}개`:"아직"}</b></span></div>
       <div class="sub ${S.kr&&S.kr.rels.some(r=>r.sel)?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">② 관계 발견<b>${S.kr?`관계 ${S.kr.rels.length}개 중 ${S.kr.rels.filter(r=>r.sel).length}개 선택`:"아직"}</b></span></div>
       <div class="sub ${S.kt&&S.kt.items.some(x=>x.sel)?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">③ 탐구 초점<b>${S.kt?`추천 ${S.kt.items.length}개 중 ${S.kt.items.filter(x=>x.sel).length}개 선택`:"아직"}</b></span></div>
-      <div class="sub ${S.eq&&S.eq.items.some(x=>x.sel)?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">④ 핵심 질문 도출<b>${S.eq?`질문 ${S.eq.items.length}개 중 ${S.eq.items.filter(x=>x.sel).length}개 선택`:"아직"}</b></span></div></div></div>`; }
+      <div class="sub ${S.eq&&(eqBy("l").length||eqBy("a").length)?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">④ 핵심 질문 도출<b>${S.eq?`수업 ${eqBy("l").length} · 평가 ${eqBy("a").length}`:"아직"}</b></span></div></div></div>`; }
     if (i===5) return `<div class="cat-wrap"><button class="cat ${i===curStep?'active':''}" type="button" data-step="${i}" aria-current="${i===curStep?'step':'false'}">
       <span class="num">${i+1}.</span><span class="lbl">${esc(s.name)}</span></button><div class="subs">
       <div class="sub ${S.ls&&S.ls.n?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">① 차시 수 정하기<b>${S.ls&&S.ls.n?`총 ${S.ls.n}차시`:"아직"}</b></span></div>
@@ -3569,6 +3598,14 @@ function topicsHtml(){
        - getEssentialQuestions() 안의 예시 호출을 API 호출로 바꾸면 돼요.
    ===================================================================== */
 const EQ_KIND = { big:"대표 핵심 질문", fact:"사실적", concept:"개념적", debate:"논쟁적" };
+/* 사실적·개념적·논쟁적 질문은 '수업용' / '평가용'으로 나눠 골라요 (둘 다도 가능). 대표 핵심 질문은 늘 써요.
+   · 5단계 ①·②는 대표 핵심 질문만으로 만들고, ③ 총괄평가 수행과제를 만들 때만 '평가용' 질문이 함께 반영돼요.
+   · 6단계 수업 설계에는 '수업용' 질문이 쓰여요. */
+const eqUse = q => { if (!q.use) q.use = { l: !!q.sel && q.kind!=="big", a:false }; return q.use; };
+const eqSync = q => { if (q.kind!=="big"){ const u = eqUse(q); q.sel = !!(u.l || u.a); } };
+const eqBig = () => { const E = sel().eq; return E ? E.items.filter(q=>q.kind==="big" && q.text.trim()) : []; };
+const eqBy = k => { const E = sel().eq; return E ? E.items.filter(q=>q.kind!=="big" && q.text.trim() && eqUse(q)[k]) : []; };
+const aqSnap = () => JSON.stringify(eqBy("a").map(q=>[q.id, q.text]));
 const EQ_KIND_DESC = { fact:"사례와 사실을 찾게 해요", concept:"개념 사이의 관계를 일반화하게 해요", debate:"입장을 세우고 근거로 토론하게 해요" };
 function focusParts(f){
   let from = f.from && f.from.length ? f.from : null, to = f.to && f.to.length ? f.to : null;
@@ -3707,8 +3744,12 @@ async function runEQ(){
   const el = $("#eqSec"); if (el) el.scrollIntoView({ block:"start", behavior:"smooth" });
 }
 function eqItemHtml(q, n){
+  if (q.kind==="big") q.sel = true;
+  const u = q.kind==="big" ? null : eqUse(q);
+  const pick = q.kind==="big" ? `<span class="eq-always" title="대표 핵심 질문은 늘 써요">✓</span>`
+    : `<div class="eq-use" role="group" aria-label="이 질문을 어디에 쓸까요"><button type="button" class="eq-u l ${u.l?'on':''}" data-equse="l" data-q="${q.id}" aria-pressed="${u.l}">수업</button><button type="button" class="eq-u a ${u.a?'on':''}" data-equse="a" data-q="${q.id}" aria-pressed="${u.a}">평가</button></div>`;
   return `<li class="eq-item ${q.kind} ${q.sel?'on':''}">
-    <label class="kr-pick"><input type="checkbox" id="eqsel-${selKey()}-${q.id}" data-eqsel="${q.id}" ${q.sel?"checked":""} aria-label="질문 선택"></label>
+    ${pick}
     <div class="eq-main"><div class="eq-top"><span class="eq-kind ${q.kind}">${EQ_KIND[q.kind]||"질문"}</span>${q.scope?`<span class="sc-tag ${q.scope}">${SCOPE_NAME[q.scope]}</span>`:""}${q.mine?`<span class="kt-t mine">직접 작성</span>`:""}${q.edited?`<span class="kt-t ed">고침</span>`:""}${q.why?`<span class="eq-why">${esc(q.why)}</span>`:""}</div>
       <div class="eq-text" contenteditable="plaintext-only" role="textbox" tabindex="0" data-eqtext="${q.id}" id="eqt-${selKey()}-${q.id}" data-ph="질문을 적어 주세요" aria-label="질문 고치기">${esc(q.text)}</div></div>
     <button class="ce-del" type="button" data-eqdel="${q.id}" aria-label="질문 지우기">×</button></li>`;
@@ -3732,7 +3773,8 @@ function eqHtml(){
       <div class="cp-add" style="max-width:none"><input type="text" id="eqadd-${selKey()}-${f.id}" data-eqadd="${f.id}" placeholder="+ 이 초점의 질문 직접 추가 (Enter)" aria-label="질문 직접 추가"></div></div>`; }).join("");
   const orphan = E.items.filter(q=>q.kind!=="big" && q.focusId && !chosen.some(f=>f.id===q.focusId));
   return `<section id="eqSec">${head}
-    <p class="ce-head-note">학생에게 던질 질문이에요. 수업에서 쓸 질문을 고르고, 문장은 눌러서 고칠 수 있어요. AI 연결 전이라 지금은 예시 틀로 만들어요.</p>
+    <p class="ce-head-note">대표 핵심 질문은 단원 전체를 꿰는 질문으로 늘 써요. 사실적·개념적·논쟁적 질문은 활용할 곳을 <b>수업</b> · <b>평가</b>로 골라 주세요 (둘 다 골라도 돼요). 5단계의 사고·평가 요소는 대표 핵심 질문으로 만들고, 총괄평가 수행과제를 만들 때만 '평가'로 고른 질문이 함께 반영돼요. '수업'으로 고른 질문은 6단계 수업 설계에 쓰여요. 문장은 눌러서 고칠 수 있어요.</p>
+    <div class="eq-count"><span>수업 <b>${eqBy("l").length}</b>개</span><span>평가 <b>${eqBy("a").length}</b>개</span></div>
     ${status}
     <div class="eq-big"><ol class="eq-list">${big.map(q=>eqItemHtml(q)).join("")}</ol></div>
     <div class="eq-legend">${["fact","concept","debate"].map(k=>`<span><i class="eq-kind ${k}">${EQ_KIND[k]}</i>${EQ_KIND_DESC[k]}</span>`).join("")}</div>
@@ -3769,14 +3811,14 @@ function step4Html(a){
 }
 /* =====================================================================
    5단계 · 평가 요소 설계
-   ① 학생이 드러내어야 할 사고: 4단계에서 고른 핵심 질문마다, 학생이 배우며 해야 할 '사고'를 뽑아요.
+   ① 학생이 드러내어야 할 사고: 4단계의 대표 핵심 질문을 바탕으로, 학생이 배우며 해야 할 '사고'를 뽑아요.
       겉으로 보이는 수행(설명·발표·작성)은 쓰지 않고, 수행은 이후 평가 설계에서 다뤄요. 고치고, 몇 가지를 골라 다음에 써요.
    ▼ API 연결 지점: getStudentThinking(questions)
    ===================================================================== */
 const TH_MAX = 3;
 const TH_RULE = 2;  // 예시 규칙 버전: 바뀌면 손대지 않은 예전 예시 목록을 새로 만들어요   // 질문 하나에 사고 최대 개수
-const thQuestions = () => { const E = sel().eq; return E ? E.items.filter(q=>q.sel && q.text.trim()) : []; };
-const thSnap = E => JSON.stringify(E ? E.items.filter(q=>q.sel && q.text.trim()).map(q=>[q.id, q.text]) : []);
+const thQuestions = () => eqBig();   // 5단계 ①·②는 대표 핵심 질문만으로
+const thSnap = E => JSON.stringify(E ? E.items.filter(q=>q.kind==="big" && q.text.trim()).map(q=>[q.id, q.text]) : []);
 const thui = { confirm:false };
 /* 질문 속 핵심 개념 (4단계 ① 개념 가운데 질문에 나온 것) */
 function qConcepts(text){
@@ -3799,6 +3841,10 @@ function studentThinkingExample(qs){
     } else if (q.kind==="big"){
       add(i, "적용·전이", `${AB}에 대한 이해가 내 삶과 공동체의 다른 상황에도 이어질 수 있는지 연결 지어 생각한다.`);
       add(i, "성찰", `${josa(AB,"을","를")} 배우며 자신의 생각이 어떻게, 왜 달라졌는지 되돌아본다.`);
+      if (qs.length===1){
+        add(i, "관계 분석", B ? `${josa(A,"과","와")} ${josa(B,"이","가")} 왜, 어떻게 서로 이어지는지 그 원리를 따져 본다.` : `${josa(A,"이","가")} 어떤 원리로 작용하는지 그 까닭을 따져 본다.`);
+        add(i, "평가·판단", `${AB}의 활용이 누구에게 어떤 도움과 손해를 주는지 따져 보고, 무엇이 더 바람직한지 스스로 판단한다.`);
+      }
     } else {
       add(i, "관계 분석", B ? `${josa(A,"과","와")} ${josa(B,"이","가")} 왜, 어떻게 서로 이어지는지 그 원리를 따져 본다.` : `${josa(A,"이","가")} 어떤 원리로 작용하는지 그 까닭을 따져 본다.`);
       add(i, "추론·일반화", D ? `여러 사례의 공통점을 견주어 보며, ${josa(AB,"이","가")} ${D}에 주는 영향을 일반적인 원리로 이해한다.` : `여러 사례를 견주어 보며, ${AB}에 대해 사례를 넘어 두루 성립하는 원리가 무엇인지 생각한다.`);
@@ -3812,11 +3858,11 @@ function buildThinkingPrompt(ctx, qs){
 
 [맥락] ${ctxFor("th", ctx)}
 
-[고른 핵심 질문]
+[대표 핵심 질문]
 ${qs.map((q,i)=>`${i+1}. (${EQ_KIND[q.kind]||"질문"}) ${q.text}`).join("\n")}
 
 규칙
-- 질문마다 학생이 드러내어야 할 사고를 2개 씁니다 (꼭 필요할 때만 ${TH_MAX}개).
+- ${qs.length===1 ? "이 대표 핵심 질문 하나를 깊이 탐구할 때 학생이 드러내어야 할 사고를 4~5개, 서로 다른 사고 유형(관계 이해, 비교, 판단, 적용·전이, 성찰 등)으로 씁니다." : `질문마다 학생이 드러내어야 할 사고를 2개 씁니다 (꼭 필요할 때만 ${TH_MAX}개).`}
 - '수행'이 아니라 '사고'를 씁니다. 학생이 이 내용을 배우며 머릿속에서 무엇을 어떻게 생각해야 하는지(따져 본다, 견주어 본다, 연결 지어 생각한다, 원리를 이해한다, 스스로 판단한다, 되돌아본다 등)를 씁니다.
 - 겉으로 보이는 수행·산출(설명한다, 발표한다, 근거를 들어 주장한다, 정리한다, 작성한다, 만든다, 사례를 들어 ~한다)은 쓰지 않습니다. 수행은 이후 평가 설계에서 다룹니다.
 - 무엇을(질문 속 개념·내용) + 어떻게 생각하는지가 드러나게, '~한다.'로 끝나는 한 문장으로 씁니다.
@@ -3828,7 +3874,7 @@ JSON 하나만 답하세요: {"thinking":[{"q":1,"kind":"관계 분석","text":"
 async function getStudentThinking(qs){
   return viaAI("학생이 드러내어야 할 사고", buildThinkingPrompt(designContext(), qs),
     r => r && Array.isArray(r.thinking) && r.thinking.length ? { thinking: r.thinking.map(x=>({ q:Number(x.q)||1, kind:String(x.kind||"").trim(), text:String(x.text||"").trim() })).filter(x=>x.text)
-      .filter((x,i,arr)=>arr.slice(0,i).filter(y=>y.q===x.q).length < TH_MAX) } : null,
+      .filter((x,i,arr)=>arr.slice(0,i).filter(y=>y.q===x.q).length < (qs.length===1 ? 5 : TH_MAX)) } : null,
     () => studentThinkingExample(qs), { maxTokens:900 });
 }
 async function runThinking(){
@@ -3858,7 +3904,7 @@ function thinkingHtml(){
   const note = H
     ? `<p class="ce-head-note">핵심 질문을 탐구하며 학생이 해야 할 사고예요. 겉으로 보이는 수행이 아니라 머릿속 생각에 초점을 두었어요 (수행은 이후 평가 설계에서 다뤄요). 문장은 눌러서 고칠 수 있고, 이어 갈 사고를 골라 주세요. AI 연결 전이라 지금은 예시 틀로 만들어요.</p>
        <div class="kr-pickhead"><b>고른 사고</b><span class="n">${H.items.length}개 중 ${n}개</span></div>`
-    : `<p class="ce-head-note">4단계에서 고른 핵심 질문 ${qs.length}개마다, 학생이 이 내용을 배우며 해야 할 사고(원리 따져 보기, 견주어 보기, 연결 지어 생각하기, 스스로 판단하기, 되돌아보기 등)를 뽑아 드려요. 수행은 이후 평가 설계에서 다뤄요. AI 연결 전이라 지금은 예시 틀로 만들어요.</p>`;
+    : `<p class="ce-head-note">4단계의 대표 핵심 질문을 바탕으로, 학생이 이 내용을 배우며 해야 할 사고(원리 따져 보기, 견주어 보기, 연결 지어 생각하기, 스스로 판단하기, 되돌아보기 등)를 뽑아 드려요. 수행은 이후 평가 설계에서 다뤄요. AI 연결 전이라 지금은 예시 틀로 만들어요.</p>`;
   return `<section id="thSec">${head}${note}${status}${groups}</section>`;
 }
 /* ---------- 5단계 ② 평가 요소 설계 ----------
@@ -4052,9 +4098,13 @@ function buildTaskPrompt(ctx, els){
 ${els.map((x,i)=>`${i+1}. ${evCombined(x)}`).join("\n")}
 
 [교사가 고른 평가 방법] ${ptMethods().join(", ")}
-
+${eqBy("a").length ? `
+[평가용으로 고른 핵심 질문] (대표 핵심 질문을 돕는 보조 질문)
+${eqBy("a").map(q=>`- (${EQ_KIND[q.kind]}) ${q.text}`).join("\n")}
+` : ""}
 규칙
 - 평가 요소를 따로따로 나열하지 말고, 하나의 흐름으로 자연스럽게 이어지는 과제 하나로 엮습니다.
+- [평가용으로 고른 핵심 질문]이 있으면 과제의 중심은 평가 요소에 두되, 그 질문들이 상황·과제 목표·산출물에 조금씩 녹아들게 합니다 (사실적 → 근거 자료·사례 확인, 개념적 → 원리·관계 설명, 논쟁적 → 입장과 근거를 세우는 판단). 질문 문장을 그대로 옮기거나 나열하지 않습니다.
 - title(과제명): 과제에서 탐구할 내용이 드러나는 짧은 이름.
 - situation(상황): '도서관에서', '학교 운영위원회가 요청했습니다', '○○ 공모전'처럼 특정 장소·인물·행사를 꾸며 내지 않습니다. 대신 학생이 어떤 물음이나 문제 앞에서 어떤 사고를 하게 되는 상황인지를 2~3문장으로 씁니다. 학생이 무엇을 마주하고(물음·문제·자료), 무엇을 따져 보고 판단해야 하는지가 드러나게 합니다.
 - goal(과제 목표): 학생이 이 과제로 이루어야 할 것을 한 문장으로 ('~한다.').
@@ -4071,12 +4121,19 @@ async function getPerformanceTask(els){
       title:String(r.title).trim(), situation:String(r.situation||"").trim(), goal:String(r.goal||"").trim(),
       product:String(r.product||"").trim(),
       elements: els.map((x,i)=>{ const t = Array.isArray(r.elements) && r.elements[i] ? String(r.elements[i]).trim().replace(/[.。]+$/,"") : ""; return t || evCombined(x); }) } : null,
-    () => performanceTaskExample(els), { maxTokens:1000 });   // 평가 방법은 runTask에서 붙여요
+    () => { const r = performanceTaskExample(els), aq = eqBy("a").slice(0,2);   // 평가용 질문을 상황·목표에 살짝 녹여요
+      if (aq.length){
+        r.situation += ` 이 과정에서 ${aq.map(q=>`'${q.text.replace(/\?$/,"")}?'`).join(", ")}라는 물음도 함께 따져 봅니다.`;
+        const k = new Set(aq.map(q=>q.kind));
+        const add = [k.has("fact")?"사례와 자료로 사실을 확인하고":"", k.has("concept")?"개념 사이의 관계를 이해하며":"", k.has("debate")?"자신의 입장을 근거로 세워":""].filter(Boolean);
+        if (add.length) r.goal = r.goal.replace(/더 나은 활용 방향을 스스로 판단한다\.$/, `${add.join(", ")} 더 나은 활용 방향을 스스로 판단한다.`);
+      }
+      return r; }, { maxTokens:1000 });   // 평가 방법은 runTask에서 붙여요
 }
 async function runTask(){
   const S = sel(), els = ptEls(); if (!els.length || !ptMethods().length) return;
   const r = await getPerformanceTask(els);
-  S.pt = { ...r, methods:ptMethods(), elements: r.elements.map((t,i)=>({ evId:els[i].id, text:t })), from:ptSnap(S.ev), mfrom:ptMSnap(), t:nowT(), ai:lastViaAI };
+  S.pt = { ...r, methods:ptMethods(), elements: r.elements.map((t,i)=>({ evId:els[i].id, text:t })), from:ptSnap(S.ev), mfrom:ptMSnap(), aq:aqSnap(), t:nowT(), ai:lastViaAI };
   ptui.edit = false; ptui.confirm = false; persist(); renderSide(); renderMain();
   const el = $("#ptSec"); if (el) el.scrollIntoView({ block:"start", behavior:"smooth" });
 }
@@ -4097,6 +4154,8 @@ function taskHtml(){
   const head = `<div class="block-head"><h3><span class="step-n">③</span>총괄평가 수행과제</h3><span class="kq-q">고른 평가 요소를 하나의 과제로 엮으면?</span></div>`;
   if (!els.length) return `<section id="ptSec">${head}<p class="ce-head-note">②에서 활용할 평가 요소를 골라 주세요. 고른 평가 요소를 종합해 하나의 총괄평가 수행과제(과제명, 상황, 과제 목표, 산출물, 평가 요소)를 추천해 드려요.</p></section>`;
   const chips = `<div class="pt-chips"><span class="pt-ck">종합할 평가 요소</span>${els.map((x,i)=>`<span class="pt-chip" title="${esc(evCombined(x))}"><b>${i+1}</b>${esc(evCombined(x))}</span>`).join("")}</div>`;
+  const aqs = eqBy("a");
+  const aqBox = `<div class="pt-chips"><span class="pt-ck">함께 반영할 평가용 질문</span>${aqs.length ? aqs.map(q=>`<span class="pt-chip aq" title="${esc(q.text)}"><i class="eq-kind ${q.kind}">${EQ_KIND[q.kind]}</i>${esc(q.text)}</span>`).join("") : `<span class="ana-none">4단계 ④에서 '평가'로 고른 질문이 없어요. 평가 요소만으로 과제를 만들어요.</span>`}</div>`;
   const M = ptmOf(), ms = ptMethods();
   const methods = `<div class="pt-m"><div class="pt-mh"><b>평가 방법</b><span>수행과제를 만들기 전에 활용할 평가 방법을 골라 주세요 (여러 개 고를 수 있어요)</span></div>
     <div class="pt-mlist">${PT_METHODS.map(m=>`<label class="pt-mi ${M.picked.includes(m)?'on':''}"><input type="checkbox" id="ptm-${selKey()}-${PT_METHODS.indexOf(m)}" data-ptm="${m}" ${M.picked.includes(m)?"checked":""}>${m}</label>`).join("")}
@@ -4104,6 +4163,7 @@ function taskHtml(){
   const ai = `<div class="pt-ai"><span class="pt-ai-i" aria-hidden="true">${sparkSvg}</span><div class="pt-ai-t"><b>AI 추천</b><p>${ms.length ? `고른 평가 요소 ${els.length}개를 종합해, <b class="pt-mb">${esc(ms.join(" · "))}</b>${josa(ms[ms.length-1],"으로","로").slice(ms[ms.length-1].length)} 수행할 하나의 수행과제(과제명, 상황, 과제 목표, 산출물, 평가 요소)를 제안해요.` : `먼저 위에서 평가 방법을 골라 주세요. 고른 방법에 맞게 수행과제를 제안해요.`}${aiOn()?"":" AI 연결 전이라 지금은 예시 틀로 만들어요."}</p></div>
     <button class="btn primary pt-go" type="button" data-ptact="run" ${ms.length?"":"disabled"}>${sparkSvg}${P?"수행과제 다시 제안":"수행과제 제안받기"}</button></div>`;
   let status = "";
+  if (P && !ptui.confirm && P.aq !== undefined && P.aq !== aqSnap()) status = `<div class="ce-status warn">수행과제를 만든 뒤에 4단계에서 '평가'로 고른 질문이 바뀌었어요. 반영하려면 '수행과제 다시 제안'을 눌러 주세요.</div>`;
   if (ptui.confirm) status = `<div class="ce-status warn">수행과제를 새로 제안받아요. 고친 내용이 사라져요.<span class="sp"></span><button class="mini" type="button" data-ptact="go">새로 제안받기</button><button class="mini" type="button" data-ptact="cancel">취소</button></div>`;
   const card = P ? `<div class="pt-card">
       <div class="pt-ch"><b>총괄평가 수행과제</b>${P.edited?`<span class="kt-t ed">고침</span>`:""}<span class="sp"></span>
@@ -4115,7 +4175,7 @@ function taskHtml(){
       ${ptField("product","산출물",P.product,"산출물을 적어 주세요")}
       ${ptList("elements","평가 요소",P.elements.map(e=>e.text),"평가 요소를 한 줄에 하나씩 적어 주세요",false)}
     </div>` : "";
-  return `<section id="ptSec">${head}<p class="ce-head-note">②에서 고른 평가 요소와 아래에서 고른 평가 방법이 반영된 총괄평가 수행과제예요. 학생이 실제로 수행할 과제와 산출물을 확인하고, '수정'을 눌러 다듬어 주세요.</p>${chips}${methods}${ai}${status}${card}</section>`;
+  return `<section id="ptSec">${head}<p class="ce-head-note">②에서 고른 평가 요소를 중심으로, 아래에서 고른 평가 방법과 4단계에서 '평가'로 고른 핵심 질문이 함께 반영된 총괄평가 수행과제예요. 학생이 실제로 수행할 과제와 산출물을 확인하고, '수정'을 눌러 다듬어 주세요.</p>${chips}${aqBox}${methods}${ai}${status}${card}</section>`;
 }
 function step5Html(a){
   const qs = thQuestions(), H = sel().th;
@@ -4126,7 +4186,7 @@ function step5Html(a){
   }
   const head = `<div class="area-tag">선택한 영역 <b>${esc(cur().name)} ${esc(areaLabel(a))}</b><button class="mini" type="button" data-step="3">4단계로</button></div>`;
   if (!qs.length) return head + `<section><div class="block-head"><h3><span class="step-n">①</span>학생이 드러내어야 할 사고</h3></div>
-    <div class="empty-step"><b>먼저 핵심 질문을 골라 주세요</b><p>5단계는 4단계 ④에서 고른 핵심 질문을 바탕으로 학생이 드러내어야 할 사고를 정해요.</p>
+    <div class="empty-step"><b>먼저 핵심 질문을 만들어 주세요</b><p>5단계는 4단계 ④의 대표 핵심 질문을 바탕으로 학생이 드러내어야 할 사고를 정해요.</p>
     <button class="btn primary sm" type="button" data-step="3">4단계로 가기</button></div></section>`;
   return head + thinkingHtml() + evalHtml() + taskHtml();
 }
@@ -4188,10 +4248,29 @@ function lpNormalize(rows, n){
   while (sum < n){ const r = rows[rows.length-1]; if (r && r.span < LP_SPAN_MAX && !r.blank){ r.span++; } else rows.push({ id:rid(), span:1, kind:"activity", exp:"", evals:[], cases:[], blank:true }); sum++; }
   return rows.map(r=>{ const { blank, ...x } = r; return x; });
 }
+/* 수업 설계에 쓰는 질문: 대표 핵심 질문(Q0) + '수업'으로 고른 질문(Q1…). 한 질문이 여러 행(차시)에 걸칠 수 있어요 */
+function lpQs(){ const big = eqBig()[0], out = [];
+  if (big) out.push({ id:big.id, kind:"big", text:big.text, n:0 });
+  eqBy("l").forEach((q,i)=>out.push({ id:q.id, kind:q.kind, text:q.text, n:i+1 }));
+  return out; }
+const lpQSnap = () => JSON.stringify(lpQs().map(q=>[q.id, q.text]));
+const lpQLabel = q => q.kind==="big" ? "대표" : `Q${q.n}`;
+/* 규칙 예시: 가운데 행에 질문을 차례로 나눠 붙여요. 질문이 행보다 적으면 한 질문이 이어진 여러 행에 걸치고, 많으면 한 행에 여러 질문이 들어가요 */
+function lpAssignQs(rows){
+  const Q = lpQs(), big = Q.find(q=>q.kind==="big"), lq = Q.filter(q=>q.kind!=="big");
+  const mids = rows.map((r,i)=>i).filter(i=>i>0 && i<rows.length-1);
+  rows.forEach((r,i)=>{ r.qids = []; });
+  if (rows.length && big) rows[0].qids.push(big.id);
+  if (rows.length>1 && big) rows[rows.length-1].qids.push(big.id);
+  const M = mids.length || 1, targets = mids.length ? mids : [rows.length>1 ? rows.length-1 : 0];
+  lq.forEach((q,k)=>{ if (lq.length <= M){ const a = Math.floor(k*M/lq.length), b = Math.max(a+1, Math.floor((k+1)*M/lq.length)); for (let t=a;t<b;t++) rows[targets[t]].qids.push(q.id); }
+    else rows[targets[Math.floor(k*M/lq.length)]].qids.push(q.id); });
+  return rows;
+}
 function lessonPlanExample(n){
   const S = sel(), P = S.pt, E = S.eq, H = S.th;
   const big = E ? (E.items.find(q=>q.kind==="big" && q.sel) || {}).text : "";
-  const qs = E ? E.items.filter(q=>q.sel && q.kind!=="big").map(q=>q.text) : [];
+  const qs = eqBy("l").map(q=>q.text);
   const ts = H ? H.items.filter(x=>x.sel).map(x=>x.text) : [];
   const els = P ? P.elements.map(e=>e.text) : [];
   const K = S.kq, C = K ? K.list.map(c=>c.text) : [];
@@ -4199,7 +4278,10 @@ function lessonPlanExample(n){
   const spans = [];
   if (n <= 3) for (let i=0;i<n;i++) spans.push(1);
   else { spans.push(1); const last = n >= 6 ? 2 : 1; let mid = n - 1 - last; while (mid > 0){ const k = mid >= 2 ? 2 : 1; spans.push(k); mid -= k; } spans.push(last); }
-  return { rows: spans.map((span, i)=>{
+  const Qs = lpQs(), qa = lpAssignQs(spans.map(span=>({ span })));
+  const qOf = i => (qa[i].qids||[]).map(id=>Qs.find(q=>q.id===id)).filter(q=>q && q.kind!=="big");
+  return { rows: spans.map((span, i)=>{ const row = lpRowExample(span, i); row.qids = qa[i].qids; return row; }) };
+  function lpRowExample(span, i){
     const first = i===0, lastRow = i===spans.length-1 && spans.length > 1, m = i - 1;
     if (first) return { span, kind:"question",
       exp: big ? `"${big}"라는 대표 핵심 질문을 처음 만나, 지금 떠오르는 생각과 생활 경험을 나눈다.` : `단원의 핵심 질문을 처음 만나, 지금 떠오르는 생각과 생활 경험을 나눈다.`,
@@ -4217,36 +4299,40 @@ function lessonPlanExample(n){
               { label:"동료 피드백이 피상적", when:"동료 피드백이 '좋아요', '잘했어요'에 그치면", fb:"평가 요소별로 '잘된 점 하나, 더할 점 하나'를 적는 피드백 틀을 주어 다시 주고받게 한다." },
               { label:"참여 불균형", when:"수행 도중 모둠 안에서 일부 학생만 산출물을 만들면", fb:"역할을 나누어 맡게 하고, 각자 맡은 부분의 생각을 따로 기록하도록 안내한다." },
               { label:"일찍 마침", when:"수행과제를 일찍 마친 모둠이 있으면", fb:"다른 관점에서 나올 반론을 예상해 보게 하여 결과물을 한 번 더 다듬도록 한다." } ] };
-    const q = qs.length ? qs[m % qs.length] : "", t = ts.length ? ts[m % ts.length] : "", el = els.length ? els[m % els.length] : "";
-    return { span, kind: q && m % 2 === 0 ? "question" : "activity",
-      exp: q && m % 2 === 0 ? `"${q}"라는 탐구 질문을 두고 여러 사례를 견주어 보며 생각을 넓힌다.` : (el ? `모둠별로 '${el}' 활동을 하며 서로의 생각을 견주어 본다.` : `여러 사례를 모둠별로 탐구하며 서로의 생각을 견주어 본다.`),
-      evals: [ { type:"form", text: el ? `'${el}'가 드러나는지 확인하는 출구 카드` : `오늘 배운 내용을 한 문장으로 정리하는 출구 카드` } ].concat(q && m % 2 === 0 ? [] : [ { type:"form", text:"모둠 활동 중 생각을 나누는 모습을 살피는 관찰 체크리스트" } ]),
-      cases: (q && m % 2 === 0 ? [
+    const mq = qOf(i), q = mq.length ? mq.map(x=>x.text).join('", "') : (qs.length ? qs[m % qs.length] : ""), t = ts.length ? ts[m % ts.length] : "", el = els.length ? els[m % els.length] : "";
+    const cont = mq.length && i>1 && qOf(i-1).some(x=>mq.includes(x));   // 앞 행에서 이어지는 질문
+    const asQ = !!q && !cont && (mq.length > 0 || m % 2 === 0);
+    return { span, kind: asQ ? "question" : "activity",
+      exp: cont ? `앞 차시에 이어 "${q}"를 더 깊이 탐구하며, ${el ? `'${el}'에 필요한 생각을 활동으로 다듬는다.` : "자신의 생각을 근거로 다듬는다."}` : asQ ? `"${q}"라는 탐구 질문을 두고 여러 사례를 견주어 보며 생각을 넓힌다.` : (el ? `모둠별로 '${el}' 활동을 하며 서로의 생각을 견주어 본다.` : `여러 사례를 모둠별로 탐구하며 서로의 생각을 견주어 본다.`),
+      evals: [ { type:"form", text: el ? `'${el}'가 드러나는지 확인하는 출구 카드` : `오늘 배운 내용을 한 문장으로 정리하는 출구 카드` } ].concat(asQ ? [] : [ { type:"form", text:"모둠 활동 중 생각을 나누는 모습을 살피는 관찰 체크리스트" } ]),
+      cases: (asQ ? [
               { label:"사례 나열에 그침", when:"수업 도중 모둠 탐구가 사례를 늘어놓는 데서 멈추면", fb:"'이 사례들의 공통점은 무엇일까?'라는 질문 카드를 건네 사례에서 원리로 생각을 옮기게 한다." },
               { label:"한쪽 관점", when:"탐구 질문에 대한 답이 한 가지 관점에만 머물면", fb:"다른 사람의 처지에서 다시 보게 하는 질문을 던져 관점을 넓히게 한다." } ] : [
               { label:"활동만 하고 생각은 없음", when:"활동 결과물은 있지만 왜 그렇게 했는지 설명하지 못하면", fb:"'이렇게 한 까닭은?'을 결과물 옆에 한 줄씩 적게 해 활동과 생각을 잇게 한다." },
               { label:"모둠 의견 충돌", when:"활동 도중 모둠 안에서 의견이 갈려 진행이 멈추면", fb:"서로의 근거를 표로 나란히 적어 보게 한 뒤, 공통으로 받아들일 수 있는 기준부터 정하게 한다." } ]).concat([
               { label:"출구 카드: 근거 부족", when:`출구 카드에 ${el ? `'${el}'에 대한 ` : ""}결론만 있고 근거가 없으면`, fb:"다음 차시 시작에 근거가 잘 드러난 카드 몇 장을 함께 읽고, 자기 카드에 근거를 한 줄 덧붙이게 한다." },
               { label:"출구 카드: 잘 드러남", when: t ? "출구 카드에 기대한 사고가 근거와 함께 잘 드러나면" : "출구 카드에 사례 사이의 공통점이 잘 드러나면", fb:"다른 사례에도 같은 원리가 적용되는지 묻는 심화 질문을 주어 생각을 일반화하도록 이끈다." } ]) };
-  }) };
+  }
 }
 function buildLessonPrompt(ctx, n){
   const S = sel(), P = S.pt, E = S.eq, H = S.th;
   const big = E ? (E.items.find(q=>q.kind==="big" && q.sel) || {}).text : "";
-  const qs = E ? E.items.filter(q=>q.sel && q.kind!=="big").map(q=>q.text) : [];
+  const qs = eqBy("l").map(q=>q.text);
   const ts = H ? H.items.filter(x=>x.sel).map(x=>x.text) : [];
   return `당신은 2022 개정 교육과정에 따라 개념 기반 탐구 수업을 설계하는 중학교 교사를 돕습니다.
 질문: 총 ${n}차시 동안 학생이 어떤 경험을 거쳐 아래 총괄평가 수행과제에 이르게 할까?
 
 [맥락] ${ctxFor("th", ctx)}
-[대표 핵심 질문] ${big || "(없음)"}
-[핵심 질문] ${qs.join(" / ") || "(없음)"}
+[수업에 쓸 질문] (번호로 가리킵니다)
+${lpQs().map(q=>`Q${q.n} (${q.kind==="big"?"대표 핵심 질문":EQ_KIND[q.kind]+" 질문"}) ${q.text}`).join("\n") || "(없음)"}
 [학생이 해야 할 사고] ${ts.join(" / ") || "(없음)"}
 [총괄평가 수행과제] ${P ? JSON.stringify({ 과제명:P.title, 상황:P.situation, 과제목표:P.goal, 평가방법:P.methods, 산출물:P.product, 평가요소:P.elements.map(e=>e.text) }) : "(없음)"}
 
 규칙
 - rows는 수업 흐름의 행입니다. 한 행에 1~${LP_SPAN_MAX}차시를 묶을 수 있으며(span), 모든 행의 span 합은 반드시 ${n}입니다. 활동이 이어지는 차시는 묶고, 흐름이 바뀌는 곳에서 행을 나눕니다.
 - exp(학습 경험): 그 행에서 학생이 탐구할 질문이나 할 활동을 한 문장으로 씁니다. kind는 탐구 질문이 중심이면 "question", 활동이 중심이면 "activity".
+- 설계의 세 축: 대표 핵심 질문(Q0), 총괄평가 수행과제, '수업'으로 고른 질문(Q1~)을 모두 고려합니다. 대표 핵심 질문은 단원 전체를 꿰는 축으로 처음과 끝에 다시 등장하고, 수업용 질문은 수행과제에 필요한 이해와 사고를 기르는 탐구로 배치하며, 모든 행은 수행과제로 이어지는 흐름 위에 놓입니다.
+- qs: 그 행에서 다루는 질문 번호(숫자 배열). 한 질문이 한 행에서만 다뤄질 수도 있고, 깊은 탐구가 필요하면 이어지는 2개 이상의 행에 걸쳐 다뤄질 수도 있습니다(예: 논쟁적 질문을 근거 탐색 → 토론으로 두 행에 걸쳐). 한 행에서 여러 질문을 함께 다뤄도 됩니다. 수업용 질문(Q1~)은 모두 적어도 한 행에 들어가야 합니다. 여러 행에 걸친 질문은 행마다 탐구가 어떻게 깊어지는지 exp에 드러냅니다.
 - 흐름: 처음에는 대표 핵심 질문으로 생각을 열고, 가운데는 핵심 질문과 사고를 깊게 하는 탐구, 끝에는 총괄평가 수행과제를 수행하도록 이어지게 합니다. 수행과제의 평가 요소가 앞선 행에서 미리 길러지도록 배치합니다.
 - evals(평가): 그 행에서 활용할 평가를 유형별로 모두 적습니다 (1~3개). type은 진단평가 "diag", 형성평가 "form", 총괄평가 "sum"이고, text에는 무엇으로 어떻게 확인할지 한 문장으로 씁니다.
   · 진단평가는 주로 단원 처음, 형성평가는 차시마다 배움을 확인하고 피드백하는 데 씁니다. 한 행에 진단과 형성을 함께 써도 됩니다.
@@ -4256,11 +4342,12 @@ function buildLessonPrompt(ctx, n){
   · label은 상황을 4~10자로 줄인 이름, when은 상황을 '~하면'으로, feedback은 교사가 줄 피드백을 '~한다.'로 끝냅니다.
   · 막히는 상황(오개념, 근거 부족, 한쪽 관점, 참여 부족 등)과 잘 해내는 상황(더 넓히거나 깊게 하는 피드백)을 섞고, 수업 도중 상황과 평가 결과 상황을 함께 다룹니다.
 - 특정 장소·인물·행사를 꾸며 내지 말고, 중학생 수준에 맞게 씁니다.
-JSON 하나만 답하세요: {"rows":[{"span":1,"kind":"question","exp":"...","evals":[{"type":"diag","text":"..."},{"type":"form","text":"..."}],"cases":[{"label":"근거 부족","when":"~하면","feedback":"~한다."}]}]}`;
+JSON 하나만 답하세요: {"rows":[{"span":1,"kind":"question","qs":[0],"exp":"...","evals":[{"type":"diag","text":"..."},{"type":"form","text":"..."}],"cases":[{"label":"근거 부족","when":"~하면","feedback":"~한다."}]}]}`;
 }
 async function getLessonPlan(n){
   return viaAI("차시별 수업 설계", buildLessonPrompt(designContext(), n),
     r => r && Array.isArray(r.rows) && r.rows.length ? { rows: r.rows.map(x=>({ span:+x.span || 1, kind: x.kind==="question" ? "question" : "activity",
+      qids: (()=>{ const Q = lpQs(); return [...new Set((Array.isArray(x.qs)?x.qs:[]).map(v=>Number(String(v).replace(/\D/g,""))).map(n=>(Q.find(q=>q.n===n)||{}).id).filter(Boolean))]; })(),
       exp:String(x.exp||"").trim(),
       evals: (()=>{ const ty = v => /sum|총괄/.test(String(v)) ? "sum" : /diag|진단/.test(String(v)) ? "diag" : "form";
         const es = (Array.isArray(x.evals) ? x.evals : []).map(e=>typeof e==="string" ? { type:"form", text:e.trim() } : { type:ty(e.type), text:String(e.text||"").trim() }).filter(e=>e.text).slice(0, 4);
@@ -4272,7 +4359,12 @@ async function getLessonPlan(n){
 async function runLessonPlan(){
   const S = sel(), n = lsOf().n; if (!n) return;
   const r = await getLessonPlan(n);
-  S.lp = { rows: lpNormalize(r.rows.map(x=>({ id:rid(), ...x })), n), from:lpSnap(), t:nowT(), ai:lastViaAI };
+  const rows = lpNormalize(r.rows.map(x=>({ id:rid(), ...x })), n);
+  // AI가 빠뜨린 수업용 질문은 가운데 행 가운데 비어 있는 쪽에 붙여요
+  lpQs().filter(q=>q.kind!=="big" && !rows.some(x=>(x.qids||[]).includes(q.id))).forEach(q=>{
+    const mid = rows.slice(1, -1).length ? rows.slice(1, -1) : rows; const t = mid.reduce((a,b)=>((a.qids||[]).length <= (b.qids||[]).length ? a : b));
+    (t.qids ||= []).push(q.id); });
+  S.lp = { rows, from:lpSnap(), qsnap:lpQSnap(), t:nowT(), ai:lastViaAI };
   lpui.confirm = false; persist(); renderSide(); renderMain();
   const el = $("#lpSec"); if (el) el.scrollIntoView({ block:"start", behavior:"smooth" });
 }
@@ -4283,7 +4375,7 @@ function lpSetSpan(id, span){
   if (d < 0){ r.span = span; rows.splice(i+1, 0, { id:rid(), span:-d, kind:"activity", exp:"", evals:[], cases:[], mine:true }); }
   else { let take = d, j = i+1;
     while (take > 0 && j < rows.length){ const nx = rows[j], t = Math.min(nx.span, take); nx.span -= t; take -= t; r.span += t;
-      if (!nx.span){ r.cases = [...lpCases(r), ...lpCases(nx)]; delete r.obs; r.evals = [...lpEvals(r), ...lpEvals(nx)]; ["exp"].forEach(k=>{ if ((nx[k]||"").trim()) r[k] = [r[k], nx[k]].filter(x=>(x||"").trim()).join("\n"); }); rows.splice(j,1); } } }
+      if (!nx.span){ r.qids = [...new Set([...(r.qids||[]), ...(nx.qids||[])])]; r.cases = [...lpCases(r), ...lpCases(nx)]; delete r.obs; r.evals = [...lpEvals(r), ...lpEvals(nx)]; ["exp"].forEach(k=>{ if ((nx[k]||"").trim()) r[k] = [r[k], nx[k]].filter(x=>(x||"").trim()).join("\n"); }); rows.splice(j,1); } } }
   L.rows = lpNormalize(rows, lsOf().n); L.edited = true;
 }
 /* 관찰·피드백: 상황(~하면) → 피드백(~한다) 짝. 예전 한 줄 글은 피드백 한 칸으로 옮겨 보여 줘요 */
@@ -4307,12 +4399,33 @@ function lpObsHtml(r){
 function lpCell(r, key, label, ph){
   return `<div class="lp-c"><div class="lp-ck">${label}</div><div class="lp-in" contenteditable="plaintext-only" role="textbox" tabindex="0" data-lpf="${key}" data-lpid="${r.id}" id="lp-${selKey()}-${r.id}-${key}" data-ph="${ph}" aria-label="${label} 고치기">${esc(r[key]||"")}</div></div>`;
 }
+/* 행마다 다루는 질문 (여러 개 가능) + 고르기 */
+function lpRowQsHtml(r, i){
+  const Q = lpQs(); if (!Q.length) return "";
+  const ids = r.qids || [], L = sel().lp, prev = L.rows[i-1], next = L.rows[i+1];
+  const on = Q.filter(q=>ids.includes(q.id));
+  const chip = q => { const cont = (prev && (prev.qids||[]).includes(q.id)) || (next && (next.qids||[]).includes(q.id));
+    return `<span class="lp-q ${q.kind}" title="${esc(q.text)}"><b>${lpQLabel(q)}</b>${esc(q.text)}${cont?`<i title="앞뒤 행에도 걸쳐 있어요">⇄</i>`:""}</span>`; };
+  return `<div class="lp-qs">${on.map(chip).join("") || `<span class="ana-none">연결된 질문 없음</span>`}
+    <details class="lp-qpick"><summary>질문 연결</summary><div class="lp-qlist">${Q.map(q=>`<label><input type="checkbox" id="lpq-${selKey()}-${r.id}-${q.id}" data-lpq="${q.id}" data-lpid="${r.id}" ${ids.includes(q.id)?"checked":""}><b>${lpQLabel(q)}</b> ${esc(q.text)}</label>`).join("")}</div></details></div>`;
+}
+/* 질문마다 어느 차시에서 다루는지 한눈에 */
+function lpQMapHtml(L){
+  const Q = lpQs(); if (!Q.length) return "";
+  let start = 1; const pos = L.rows.map(r=>{ const s0 = start; start += r.span; return { r, s0 }; });
+  const lines = Q.map(q=>{ const hit = pos.filter(p=>(p.r.qids||[]).includes(q.id));
+    const sum = hit.reduce((a,p)=>a+p.r.span, 0);
+    return `<li class="${hit.length?'':'miss'}"><span class="lp-q ${q.kind}"><b>${lpQLabel(q)}</b>${esc(q.text)}</span>
+      <span class="lp-qm">${hit.length ? (()=>{ const seg = []; hit.forEach(p=>{ const l = seg[seg.length-1]; if (l && l.e+1===p.s0) l.e = p.s0+p.r.span-1; else seg.push({ s:p.s0, e:p.s0+p.r.span-1 }); });
+        return seg.map(x=>lpLabel(x.s, x.e-x.s+1)).join(" · "); })() + (sum>1 ? ` <em>(${sum}차시에 걸쳐)</em>` : "") : "아직 어느 차시에도 연결되지 않았어요"}</span></li>`; }).join("");
+  return `<details class="lp-qmap" open><summary>질문별로 다루는 차시</summary><ul>${lines}</ul></details>`;
+}
 function lessonPlanHtml(){
   const S = sel(), L = S.lp, n = lsOf().n || 0, P = S.pt;
   const btn = n ? `<button class="btn ${L?'':'primary'} sm" type="button" data-lpact="run">${sparkSvg}${L?"다시 만들기":"차시별 수업 설계 제안받기"}</button>` : "";
   const head = `<div class="block-head"><h3><span class="step-n">②</span>차시별 수업 설계</h3><span class="kq-q">차시마다 무엇을 경험하고, 어떻게 확인하고, 무엇을 살펴볼까?</span><span class="sp"></span>${btn}</div>`;
   if (!n) return `<section id="lpSec">${head}<p class="ce-head-note">①에서 차시 수를 먼저 정해 주세요.</p></section>`;
-  const note = `<p class="ce-head-note">총 ${n}차시를 총괄평가 수행과제${P?` '${esc(P.title)}'`:""}에 맞춰 설계해요. 한 행에 1~${LP_SPAN_MAX}차시를 묶을 수 있고, 행마다 학습 경험(탐구 질문 또는 활동), 그 차시에 쓰는 평가(진단·형성·총괄), 교사의 관찰·피드백을 적어요. 총괄평가는 보통 마지막 차시 즈음에 둬요.${aiOn()?"":" AI 연결 전이라 지금은 예시 틀로 만들어요."}</p>${P?"":`<p class="kq-warn">5단계에서 아직 총괄평가 수행과제를 만들지 않았어요. <button class="linkish" type="button" data-step="4">5단계에서 수행과제</button>를 만들면 그 과제에 맞춰 설계해요.</p>`}`;
+  const note = `<p class="ce-head-note">총 ${n}차시를 대표 핵심 질문, 총괄평가 수행과제${P?` '${esc(P.title)}'`:""}, 4단계에서 '수업'으로 고른 질문을 함께 고려해 설계해요. 한 질문은 한 차시에서만 다룰 수도, 여러 차시에 걸쳐 깊어질 수도 있어요. 한 행에 1~${LP_SPAN_MAX}차시를 묶을 수 있고, 행마다 학습 경험(탐구 질문 또는 활동), 그 차시에 쓰는 평가(진단·형성·총괄), 교사의 관찰·피드백을 적어요. 총괄평가는 보통 마지막 차시 즈음에 둬요.${aiOn()?"":" AI 연결 전이라 지금은 예시 틀로 만들어요."}</p>${P?"":`<p class="kq-warn">5단계에서 아직 총괄평가 수행과제를 만들지 않았어요. <button class="linkish" type="button" data-step="4">5단계에서 수행과제</button>를 만들면 그 과제에 맞춰 설계해요.</p>`}`;
   if (!L) return `<section id="lpSec">${head}${note}</section>`;
   let status = "";
   if (lpui.confirm) status = `<div class="ce-status warn">차시별 설계를 새로 만들어요. 고친 내용과 차시 묶음이 사라져요.<span class="sp"></span><button class="mini" type="button" data-lpact="go">새로 만들기</button><button class="mini" type="button" data-lpact="cancel">취소</button></div>`;
@@ -4323,7 +4436,8 @@ function lessonPlanHtml(){
     return `<div class="lp-row">
       <div class="lp-no"><b>${lpLabel(s0, r.span)}</b><select class="lp-span" id="lps-${selKey()}-${r.id}" data-lpspan="${r.id}" aria-label="${lpLabel(s0, r.span)} 차시 묶음">${opts}</select></div>
       <div class="lp-c"><div class="lp-ck">학습 경험<select class="lp-sel" id="lpk-${selKey()}-${r.id}" data-lpkind="${r.id}" aria-label="학습 경험 종류">${Object.entries(LP_KIND).map(([k,v])=>`<option value="${k}" ${r.kind===k?"selected":""}>${v}</option>`).join("")}</select></div>
-        <div class="lp-in" contenteditable="plaintext-only" role="textbox" tabindex="0" data-lpf="exp" data-lpid="${r.id}" id="lp-${selKey()}-${r.id}-exp" data-ph="탐구 질문이나 활동을 적어 주세요" aria-label="학습 경험 고치기">${esc(r.exp||"")}</div></div>
+        <div class="lp-in" contenteditable="plaintext-only" role="textbox" tabindex="0" data-lpf="exp" data-lpid="${r.id}" id="lp-${selKey()}-${r.id}-exp" data-ph="탐구 질문이나 활동을 적어 주세요" aria-label="학습 경험 고치기">${esc(r.exp||"")}</div>
+        ${lpRowQsHtml(r, i)}</div>
       <div class="lp-c"><div class="lp-ck">평가<span class="lp-cn">진단·형성·총괄 중 이 차시에 쓰는 것</span></div>
         <div class="lp-evals">${lpEvals(r).map((ev,ei)=>`<div class="lp-ev ${ev.type}">
           <select class="lp-sel ${ev.type}" id="lpa-${selKey()}-${r.id}-${ei}" data-lpetype="${ei}" data-lpid="${r.id}" aria-label="평가 종류">${Object.entries(LP_ATYPE).map(([k,v])=>`<option value="${k}" ${ev.type===k?"selected":""}>${v}</option>`).join("")}</select>
@@ -4332,7 +4446,9 @@ function lessonPlanHtml(){
           <button class="lp-chip add" type="button" data-lpeadd="${r.id}">+ 평가</button></div></div>
       ${lpObsHtml(r)}
     </div>`; }).join("");
+  if (!status && L.qsnap !== undefined && L.qsnap !== lpQSnap()) status = `<div class="ce-status warn">수업 설계를 만든 뒤에 대표 핵심 질문이나 '수업'으로 고른 질문이 바뀌었어요. 행마다 연결된 질문을 다시 골라 주시거나, '다시 만들기'를 눌러 주세요.</div>`;
   return `<section id="lpSec">${head}${note}${status}
+    ${lpQMapHtml(L)}
     <div class="lp-table">${rows}</div>
     <p class="pt-hint">각 행의 차시 묶음(1~${LP_SPAN_MAX}차시)을 바꾸면, 늘릴 때는 다음 행에서 차시를 가져오고 줄일 때는 남는 차시로 새 행을 만들어요. 칸은 눌러서 고칠 수 있어요.</p>
   </section>`;
@@ -4958,6 +5074,9 @@ document.addEventListener("click", e=>{
   const thd = e.target.closest("[data-thdel]");
   if (thd){ const H = sel().th; H.items = H.items.filter(x=>x.id!==thd.dataset.thdel); persist(); renderSide(); renderMain(); return; }
   const eqd = e.target.closest("[data-eqdel]");
+  const eu = e.target.closest("[data-equse]");
+  if (eu){ const q = sel().eq.items.find(x=>x.id===eu.dataset.q); if (q){ const u = eqUse(q), k = eu.dataset.equse; u[k] = !u[k]; eqSync(q); persist(); renderSide(); renderMain();
+      const el = document.querySelector(`[data-equse="${k}"][data-q="${q.id}"]`); if (el) el.focus({ preventScroll:true }); } return; }
   if (eqd){ const E = sel().eq; E.items = E.items.filter(x=>x.id!==eqd.dataset.eqdel); persist(); renderSide(); renderMain(); return; }
   const kta = e.target.closest("[data-ktact]");
   if (kta){ const act = kta.dataset.ktact, T = sel().kt;
@@ -5221,6 +5340,10 @@ document.addEventListener("change", e=>{
     if (!to) return; f.g.items.splice(f.i, 1); f.it.edited = true; to.items.push(f.it); leChanged(); return; }
   if (t.dataset.lpetype !== undefined){ const r = sel().lp.rows.find(x=>x.id===t.dataset.lpid); const ev = r && lpEvals(r)[+t.dataset.lpetype]; if (!ev) return;
     ev.type = t.value; r.edited = true; persist(); renderMain(); const el = document.getElementById(t.id); if (el) el.focus({ preventScroll:true }); return; }
+  if (t.dataset.lpq){ const L = sel().lp, r = L && L.rows.find(x=>x.id===t.dataset.lpid); if (!r) return;
+    const ids = new Set(r.qids || []); if (t.checked) ids.add(t.dataset.lpq); else ids.delete(t.dataset.lpq);
+    r.qids = lpQs().map(q=>q.id).filter(id=>ids.has(id)); L.edited = true; persist(); renderMain();
+    const d = document.querySelector(`[data-lpq="${t.dataset.lpq}"][data-lpid="${r.id}"]`); if (d){ d.closest("details").open = true; d.focus({ preventScroll:true }); } return; }
   if (t.dataset.lpspan || t.dataset.lpkind){ const L = sel().lp, id = t.dataset.lpspan || t.dataset.lpkind, r = L.rows.find(x=>x.id===id); if (!r) return;
     if (t.dataset.lpspan) lpSetSpan(id, +t.value); else { r.kind = t.value; r.edited = true; }
     persist(); renderSide(); renderMain(); const el = document.getElementById(t.id); if (el) el.focus({ preventScroll:true }); return; }
