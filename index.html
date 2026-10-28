@@ -490,6 +490,14 @@ mark.km{background:var(--accent-soft)} mark.km.on{box-shadow:inset 0 -2px 0 var(
 .kr-pickhead .n{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
 .kr-pick{display:inline-grid;place-items:center;cursor:pointer}
 .kr-pick input{width:17px;height:17px;accent-color:var(--accent);margin:0;cursor:pointer}
+.kr-no{flex:none;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:12.5px;font-weight:700;display:grid;place-items:center}
+.kr-mv{display:inline-flex;gap:4px}
+.kr-mv .mini{padding:2px 8px}
+.kr-add{border:1px dashed var(--accent-line);background:transparent;color:var(--accent);border-radius:999px;padding:2px 10px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.kr-add:hover{background:var(--accent-soft);border-style:solid}
+.kr-rel.off{opacity:.8;background:var(--surface-2)}
+.kr-rel[draggable="true"]{cursor:grab}
+.kr-rel.drag-over{box-shadow:0 -3px 0 var(--accent)}
 .kr-rel.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent-soft) 55%,var(--surface))}
 .kt-rels{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .kt-rel{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:2px 10px 2px 3px}
@@ -1447,7 +1455,7 @@ const STEPS = [
   { name:"영역 선택", desc:"설계할 교과와 영역을 정하고, 그 영역의 핵심 아이디어와 내용 체계를 살펴보며 단원 설계의 출발점을 잡아요. 성취기준은 2단계에서 골라요." },
   { name:"설계", desc:"필요하면 구상하는 수업의 모습(설계 의도)을 적고, 핵심 아이디어와 성취기준을 골라 학생이 배울 내용을 구체화해요." } ];
 STEPS.push({ name:"개념 추출 및 핵심 아이디어 재구성", desc:"내용 요소에서 수업의 중심이 될 개념을 찾고, 설계 코치와의 대화로 교사의 의도를 다듬어 이 단원만의 핵심 아이디어로 재구성해요." });
-STEPS.push({ name:"핵심 질문 생성", desc:"재구성한 핵심 아이디어를 개념과 관계로 풀어 보고, 깊이 탐구할 초점을 정해 학생의 사고를 이끄는 핵심 질문을 만들어요." });
+STEPS.push({ name:"핵심 질문 생성", desc:"재구성한 핵심 아이디어를 개념과 관계로 풀어 보고, 관계를 탐구할 순서를 정해 그 순서대로 학생의 사고를 이끄는 핵심 질문을 만들어요." });
 STEPS.push({ name:"평가 요소 설계", desc:"대표 핵심 질문에 답하는 과정에서 학생이 드러내야 할 사고를 정하고, 이를 바탕으로 평가 요소와 총괄평가 과제를 설계해요." });
 STEPS.push({ name:"차시별 수업 설계", desc:"단원을 몇 차시로 운영할지 정하고, 총괄평가 수행과제로 이어지도록 차시마다 배움·평가·피드백을 설계한 뒤, 형성평가 결과로 다음 차시를 어떻게 바꿀지 환류까지 계획해요." });
 const curStepGet = () => Math.min(state.step||0, STEPS.length-1);
@@ -1524,8 +1532,7 @@ function cascadeApply(S){
   const ri = S.ri;
   if (S.kq && (!ri || !ri.text.trim() || S.kq.from !== ri.text)) drop("kq", "4단계 핵심 개념");
   if (S.kr && (!S.kq || S.kr.from !== krSnap(ri, S.kq))) drop("kr", "관계");
-  if (S.kt && (!S.kr || S.kt.from !== ktSnap(S.kr))) drop("kt", "탐구 초점");
-  if (S.eq && (!S.kt || S.eq.from !== eqSnap(S.kt))) drop("eq", "핵심 질문");
+  if (S.eq && !S.kr) drop("eq", "핵심 질문");   // 관계 순서가 바뀌면 지우지 않고 '다시 만들기' 안내만 해요
   if (S.th && (!S.eq || S.th.from !== thSnap(S.eq))) drop("th", "학생이 드러내어야 할 사고");
   if (S.ev && (!S.th || S.ev.from !== evSnap(S.th))) drop("ev", "평가 요소");
   if (S.lp && S.lp.from !== lpSnap()) drop("lp", "차시별 수업 설계");
@@ -1623,9 +1630,8 @@ function renderSideRaw(){
       return `<div class="cat-wrap"><button class="cat ${i===curStep?'active':''}" type="button" data-step="${i}" aria-current="${i===curStep?'step':'false'}">
       <span class="num">${i+1}.</span><span class="lbl">${esc(s.name)}</span></button><div class="subs">
       <div class="sub ${K&&K.list.length?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">① 개념 추출<b>${K?`핵심 개념 ${K.list.length}개`:"아직"}</b></span></div>
-      <div class="sub ${S.kr&&S.kr.rels.some(r=>r.sel)?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">② 관계 발견<b>${S.kr?`관계 ${S.kr.rels.length}개 중 ${S.kr.rels.filter(r=>r.sel).length}개 선택`:"아직"}</b></span></div>
-      <div class="sub ${S.kt&&S.kt.items.some(x=>x.sel)?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">③ 탐구 초점<b>${S.kt?`추천 ${S.kt.items.length}개 중 ${S.kt.items.filter(x=>x.sel).length}개 선택`:"아직"}</b></span></div>
-      <div class="sub ${S.eq&&(eqBy("l").length||eqBy("a").length)?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">④ 핵심 질문 도출<b>${S.eq?`수업 ${eqBy("l").length} · 평가 ${eqBy("a").length}`:"아직"}</b></span></div></div></div>`; }
+      <div class="sub ${S.kr&&krOrder(S.kr).length?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">② 관계 발견<b>${S.kr?`관계 ${S.kr.rels.length}개 · 순서 ${krOrder(S.kr).length}개`:"아직"}</b></span></div>
+      <div class="sub ${S.eq&&(eqBy("l").length||eqBy("a").length)?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">③ 핵심 질문 도출<b>${S.eq?`수업 ${eqBy("l").length} · 평가 ${eqBy("a").length}`:"아직"}</b></span></div></div></div>`; }
     if (i===5) return `<div class="cat-wrap"><button class="cat ${i===curStep?'active':''}" type="button" data-step="${i}" aria-current="${i===curStep?'step':'false'}">
       <span class="num">${i+1}.</span><span class="lbl">${esc(s.name)}</span></button><div class="subs">
       <div class="sub ${S.ls&&S.ls.n?'done':''}"><span class="dot" aria-hidden="true"></span><span class="sv">① 차시 수 정하기<b>${S.ls&&S.ls.n?`총 ${S.ls.n}차시`:"아직"}</b></span></div>
@@ -3321,7 +3327,16 @@ function analyzeRelationsExample(idea, concepts, surfaces){
   if ((G.length || P.length) && O.length){ const src = G.length ? G : P;
     const O4 = O.slice(0,4); rels.push({ from:src, to:O4, type:"바탕", text:`${josa(joinK(src),"은","는")} ${josa(joinK(O4),"을","를")} 이루어 가는 바탕이 된다.` }); }
   if (M.length && !P.length && O.length) rels.push({ from:M, to:O, type:"영향", text:`${josa(joinK(M),"은","는")} ${joinK(O)}에 영향을 준다.` });
-  if (rels.length < 2) for (let i=0;i<order.length-1 && rels.length<3;i++) rels.push({ from:[order[i]], to:[order[i+1]], type:"영향", text:`${josa(order[i],"은","는")} ${order[i+1]}에 영향을 준다.` });
+  // 교사가 지우고 순서를 정할 수 있게 넉넉히(5개 이상) 추천해요: 이웃한 개념끼리, 처음과 끝 개념도 이어 봐요
+  const seen = new Set(rels.map(r=>r.from.join()+">"+r.to.join()));
+  const push = (a, b, type, text) => { const k = a+">"+b; if (a===b || seen.has(k) || rels.length>=8) return; seen.add(k); rels.push({ from:[a], to:[b], type, text }); };
+  for (let i=0;i<order.length-1;i++){ const a = order[i], b = order[i+1], ra = roleOf(a), rb = roleOf(b);
+    if (ra===rb) push(a, b, "상호작용", `${josa(a,"과","와")} ${josa(b,"은","는")} 서로 영향을 주고받는다.`);
+    else if (rb==="goal") push(a, b, "바탕", `${josa(a,"은","는")} ${josa(b,"을","를")} 이루는 바탕이 된다.`);
+    else if (rb==="growth") push(a, b, "영향", `${josa(a,"은","는")} 학생의 ${b}에 영향을 준다.`);
+    else push(a, b, "영향", `${josa(a,"은","는")} ${b}에 영향을 준다.`); }
+  if (order.length > 2) push(order[0], order[order.length-1], "바탕", `${josa(order[0],"은","는")} 결국 ${josa(order[order.length-1],"을","를")} 이루는 데 이어진다.`);
+  for (let i=0;i<order.length-2 && rels.length<5;i++) push(order[i], order[i+2], "영향", `${josa(order[i],"은","는")} ${order[i+2]}에도 영향을 준다.`);
   let summary;
   const O3 = O.slice(0,3), better = O3.length && O3.every(x=>/^(삶|공동체|사회|미래|환경|생활)$/.test(x)) ? "더 나은 " : "";
   if (M.length && P.length && G.length && O.length) summary = `${josa(joinK(M),"을","를")} 활용한 ${josa(joinK(P),"은","는")} 학생의 ${josa(joinK(G),"으로","로")} 이어지고, 이는 ${better}${joinK(O3)}의 바탕이 된다.`;
@@ -3337,7 +3352,7 @@ function buildRelationPrompt(idea, concepts){
 
 질문: 이 개념들은 어떤 관계를 맺고 있는가?
 - 핵심 아이디어 문장에 드러난 관계만 다룹니다. 문장에 없는 개념을 새로 넣지 않습니다.
-- 개념을 수단(means)·과정(process)·성장(growth)·지향(goal)으로 묶고, 무리 사이의 관계를 2~4개 문장으로 씁니다.
+- 개념을 수단(means)·과정(process)·성장(growth)·지향(goal)으로 묶고, 개념 사이의 관계를 5~8개 문장으로 넉넉히 추천합니다. 교사가 필요 없는 관계를 지우고 탐구 순서를 정할 것이므로, 서로 다른 개념 쌍과 서로 다른 관계 유형을 고루 담습니다.
   관계 유형: 수단, 영향, 바탕, 상호작용, 포함
 - 예: (음악) "음악 요소의 선택과 구조화는 소통과 반응에 영향을 준다."
 - 전체 관계를 한 문장으로 요약합니다.
@@ -3362,28 +3377,45 @@ async function runRelations(){
   persist(); renderSide(); renderMain();
   const el = $("#krSec"); if (el) el.scrollIntoView({ block:"start", behavior:"smooth" });
 }
+/* 관계 순서: 교사가 고른 관계를 탐구할 순서대로 담아요 (R.order = 관계 id 배열). 핵심 질문은 이 순서대로 만들어요 */
+function krOrder(R){ if (!R) return [];
+  if (!Array.isArray(R.order)) R.order = R.rels.filter(r=>r.sel).map(r=>r.id);
+  R.order = R.order.filter(id=>R.rels.some(r=>r.id===id));
+  R.rels.forEach(r=>{ r.sel = R.order.includes(r.id); });
+  return R.order.map(id=>R.rels.find(r=>r.id===id)); }
+const krFocuses = () => krOrder(sel().kr).map(r=>({ id:r.id, title:r.text, from:r.from, to:r.to, perspective:"", desc:"" }));
+const kdrag = { id:null };
 function relationsHtml(ri, K){
   const S = sel(), R = S.kr;
   const can = K && K.list.length >= 2;
   const btn = can ? `<button class="btn ${R?'':'primary'} sm" type="button" data-kract="run">${sparkSvg}${R?"관계 다시 분석":"개념 사이의 관계 분석하기"}</button>` : "";
   const head = `<div class="block-head"><h3><span class="step-n">②</span>관계 발견</h3><span class="kq-q">이 개념들은 어떤 관계를 맺고 있는가?</span><span class="sp"></span>${btn}</div>`;
   if (!can) return `<section id="krSec">${head}<p class="ce-empty" style="padding:0">핵심 개념이 두 개 이상 있어야 관계를 분석할 수 있어요.</p></section>`;
-  if (!R) return `<section id="krSec">${head}<p class="ce-head-note">위 핵심 개념들이 핵심 아이디어 안에서 서로 어떻게 이어지는지 분석해요. 예) 음악: "음악 요소의 선택과 구조화는 소통과 반응에 영향을 준다." AI 연결 전이라 지금은 예시 규칙으로 분석해요.</p></section>`;
+  if (!R) return `<section id="krSec">${head}<p class="ce-head-note">위 핵심 개념들이 핵심 아이디어 안에서 서로 어떻게 이어지는지 여러 관계를 추천해요. 필요 없는 관계는 지우고, 남은 관계를 탐구할 순서대로 정하면 그 순서대로 핵심 질문을 만들어요. 예) 음악: "음악 요소의 선택과 구조화는 소통과 반응에 영향을 준다." AI 연결 전이라 지금은 예시 규칙으로 분석해요.</p></section>`;
   const stale = R.from !== krSnap(ri, K);
   const order = ["means","process","growth","goal"].filter(k=>R.groups.some(g=>g.role===k));
   const flow = `<div class="kr-flow">${order.map((k,i)=>{ const g = R.groups.find(x=>x.role===k);
       return `${i?`<span class="kr-arrow" aria-hidden="true">→</span>`:""}<div class="kr-col ${k}"><span class="kr-role">${ROLE[k]}</span><span class="kr-rd">${ROLE_DESC[k]}</span><div class="kr-tags">${g.concepts.map(c=>`<span class="kr-tag">${esc(c)}</span>`).join("")}</div></div>`; }).join("")}</div>`;
-  const rels = R.rels.map((r,i)=>`<li class="kr-rel ${r.sel?'on':''}">
-      <div class="kr-top"><label class="kr-pick"><input type="checkbox" id="krsel-${selKey()}-${r.id}" data-krsel="${r.id}" ${r.sel?"checked":""} aria-label="${i+1}번 관계 선택"></label><span class="kr-type t-${esc(r.type)}">${esc(r.type)}</span><span class="kr-pair">${r.from.map(esc).join(" · ")} <b>→</b> ${r.to.map(esc).join(" · ")}</span><span class="sp"></span>
-        <button class="ce-del" type="button" data-krdel="${r.id}" aria-label="${i+1}번 관계 지우기">×</button></div>
-      <div class="kr-text" contenteditable="plaintext-only" role="textbox" tabindex="0" data-krtext="${r.id}" id="kr-${selKey()}-${r.id}" aria-label="${i+1}번 관계 문장 고치기">${esc(r.text)}</div></li>`).join("");
+  const ord = krOrder(R), rest = R.rels.filter(r=>!R.order.includes(r.id));
+  const relBody = (r, label) => `<span class="kr-type t-${esc(r.type)}">${esc(r.type)}</span><span class="kr-pair">${r.from.map(esc).join(" · ")} <b>→</b> ${r.to.map(esc).join(" · ")}</span><span class="sp"></span>
+        <button class="ce-del" type="button" data-krdel="${r.id}" aria-label="${label} 관계 지우기">×</button></div>
+      <div class="kr-text" contenteditable="plaintext-only" role="textbox" tabindex="0" data-krtext="${r.id}" id="kr-${selKey()}-${r.id}" aria-label="${label} 관계 문장 고치기">${esc(r.text)}</div>`;
+  const rels = ord.map((r,i)=>`<li class="kr-rel on" draggable="true" data-krdrag="${r.id}">
+      <div class="kr-top"><span class="kr-no">${i+1}</span>
+        <span class="kr-mv"><button type="button" class="mini" data-kro="up" data-id="${r.id}" ${i?"":"disabled"} aria-label="${i+1}번 관계를 앞으로">↑</button><button type="button" class="mini" data-kro="down" data-id="${r.id}" ${i<ord.length-1?"":"disabled"} aria-label="${i+1}번 관계를 뒤로">↓</button><button type="button" class="mini" data-kro="out" data-id="${r.id}" aria-label="${i+1}번 관계를 순서에서 빼기">순서에서 빼기</button></span>
+        ${relBody(r, `${i+1}번`)}</li>`).join("");
+  const restHtml = rest.map((r,i)=>`<li class="kr-rel off">
+      <div class="kr-top"><button type="button" class="kr-add" data-kro="add" data-id="${r.id}" aria-label="이 관계를 ${ord.length+1}번째로 넣기">+ ${ord.length+1}번째로</button>
+        ${relBody(r, "순서 밖")}</li>`).join("");
   return `<section id="krSec">${head}
     ${stale?`<div class="ce-status warn">분석한 뒤에 핵심 아이디어나 핵심 개념이 바뀌었어요. 필요하면 다시 분석하세요.</div>`:""}
     <div class="kr-sum"><span class="ri-k">관계 요약</span><div class="kr-sum-t" contenteditable="plaintext-only" role="textbox" tabindex="0" data-krsum id="krsum-${selKey()}" aria-label="관계 요약 고치기">${esc(R.summary)}</div></div>
     ${flow}
-    <div class="kr-pickhead"><b>깊이 탐구할 관계를 고르세요</b><span class="n">${R.rels.filter(r=>r.sel).length}/${R.rels.length}개 선택</span></div>
-    <ol class="kr-rels">${rels}</ol>
-    <p class="ce-head-note" style="margin-top:8px">왼쪽 칸을 눌러 관계를 고르면 아래 ③에서 그 관계를 어떤 관점에서 탐구할지 추천해요. 문장을 눌러 고치고 ×로 지울 수 있어요. AI 연결 전이라 지금은 예시 규칙으로 분석해요.</p>
+    <div class="kr-pickhead"><b>탐구할 순서</b><span class="n">${ord.length}개 · 아래 ③ 핵심 질문이 이 순서대로 만들어져요</span><span class="sp"></span>
+      ${rest.length?`<button class="mini" type="button" data-kro="all">남은 관계 모두 순서에 넣기</button>`:""}${ord.length?`<button class="mini" type="button" data-kro="clear">순서 비우기</button>`:""}</div>
+    ${ord.length ? `<ol class="kr-rels">${rels}</ol>` : `<p class="ce-empty" style="padding:4px 0 8px">아직 순서를 정한 관계가 없어요. 아래 관계를 탐구할 순서대로 눌러 넣어 주세요.</p>`}
+    ${rest.length ? `<div class="kr-pickhead" style="margin-top:14px"><b>순서에 넣지 않은 관계</b><span class="n">${rest.length}개 · 누른 차례대로 순서가 매겨져요. 필요 없는 관계는 ×로 지우세요</span></div><ul class="kr-rels">${restHtml}</ul>` : ""}
+    <p class="ce-head-note" style="margin-top:8px">순서는 ↑↓ 버튼이나 끌어서 옮겨 바꿀 수 있어요. 관계 문장은 눌러서 고칠 수 있어요.</p>
   </section>`;
 }
 /* =====================================================================
@@ -3701,24 +3733,26 @@ function makeQuestionsExample(focuses){
 }
 function buildEQPrompt(ctx, focuses){
   return `당신은 2022 개정 교육과정에 따라 개념 기반 탐구 수업을 설계하는 중학교 교사를 돕습니다.
-질문: 학생들이 아래 탐구 초점을 스스로 탐구하게 하려면 어떤 질문을 던져야 할까?
+질문: 학생들이 아래 개념 간 관계를 정한 순서대로 스스로 탐구하게 하려면 어떤 질문을 던져야 할까?
 
 [맥락]
 ${ctxFor("eq", ctx)}
 
-[고른 탐구 초점]
-${focuses.map((f,i)=>`${i+1}. ${f.title}${f.desc ? " — " + f.desc : ""}`).join("\n")}
+[교사가 정한 탐구 순서] (번호 = 탐구 순서)
+${focuses.map((f,i)=>`${i+1}. ${f.title} (${f.from.join("·")} → ${f.to.join("·")})`).join("\n")}
 
 규칙
-- 초점마다 사실적(fact, 탐구의 출발점이 되는 사례·사실을 찾고 확인하게 함) 질문 1개, 개념적(concept, 개념 사이의 관계를 일반화하게 함) 질문과 논쟁적(debate, 입장을 세우고 근거로 토론하게 함) 질문을 각각 1~2개 만듭니다.
+- 반드시 위 순서를 지킵니다. focus 번호는 탐구 순서 번호이며, questions는 1번 관계부터 차례대로 씁니다. 순서를 바꾸거나 건너뛰거나 합치지 않습니다.
+- 앞 순서의 질문에서 얻은 이해가 다음 순서의 질문으로 이어지고 깊어지도록 흐름을 만듭니다 (앞 관계의 개념을 다음 질문의 출발점으로 삼을 수 있습니다).
+- 관계마다 사실적(fact, 탐구의 출발점이 되는 사례·사실을 찾고 확인하게 함) 질문 1개, 개념적(concept, 개념 사이의 관계를 일반화하게 함) 질문과 논쟁적(debate, 입장을 세우고 근거로 토론하게 함) 질문을 각각 1~2개 만듭니다.
   사실적 질문은 '무엇인가', '어떤 ~이 있는가', '어떻게 이루어져 있는가'처럼 답을 찾아 확인할 수 있게 묻고, 뒤의 개념적 질문으로 이어지게 합니다.
   개념적·논쟁적 질문의 두 번째 질문은 첫 질문과 각도나 범위가 분명히 다를 때만 씁니다. 억지로 개수를 채우지 않습니다.
-- 같은 초점 안의 질문끼리 겹치지 않게, 서로 다른 각도에서 묻습니다.
+- 같은 관계 안의 질문끼리 겹치지 않게, 서로 다른 각도에서 묻습니다.
 - 질문마다 범위(scope: me 나 / comm 공동체 / soc 사회)를 하나 적되, 세 질문에 기계적으로 나눠 주지 말고 그 질문에 가장 어울리는 범위를 고릅니다.
   다만 전체 질문을 놓고 보면 '나'에만 머물지 않고 공동체와 사회까지 고루 다뤄지게 합니다.
 - 질문 앞에 '~의 관점에서', '~의 관점에서 볼 때'를 붙이지 않습니다.
 - 학생에게 직접 던지는 말로, 정답이 하나로 정해지지 않는 열린 질문으로 씁니다. 중학생이 이해할 수 있는 낱말을 씁니다.
-- 고른 초점 전체를 꿰는 대표 핵심 질문(big)을 하나 씁니다. 단원이 끝난 뒤에도 다시 떠올릴 만한, 삶과 사회로 이어지는 질문이어야 합니다.
+- 정한 순서 전체의 흐름을 꿰는 대표 핵심 질문(big)을 하나 씁니다. 단원이 끝난 뒤에도 다시 떠올릴 만한, 삶과 사회로 이어지는 질문이어야 합니다.
 JSON 하나만 답하세요: {"big":"...","questions":[{"focus":1,"scope":"me","kind":"fact","text":"..."},{"focus":1,"scope":"comm","kind":"concept","text":"..."}]}`;
 }
 /* ▼ API 연결 지점 */
@@ -3731,15 +3765,14 @@ async function getEssentialQuestions(focuses){
       .sort((a,b)=>a.focus-b.focus || ["fact","concept","debate"].indexOf(a.kind)-["fact","concept","debate"].indexOf(b.kind)) } : null,
     () => makeQuestionsExample(focuses), { maxTokens:1200 });
 }
-const eqSnap = T => JSON.stringify(T ? T.items.filter(x=>x.sel).map(x=>[x.title, x.perspective]) : []);
+const eqSnap = () => JSON.stringify(krFocuses().map(f=>[f.id, f.title]));
 const eui = { confirm:false };
 async function runEQ(){
-  const S = sel(), T = S.kt; if (!T) return;
-  const focuses = T.items.filter(x=>x.sel); if (!focuses.length) return;
+  const S = sel(), focuses = krFocuses(); if (!focuses.length) return;
   const r = await getEssentialQuestions(focuses);
   const items = [{ id:rid(), kind:"big", text:r.big, focusId:null, sel:true }]
     .concat(r.questions.map(q=>({ id:rid(), kind:q.kind, scope:q.scope||({fact:"me",concept:"comm",debate:"soc"})[q.kind]||"", text:q.text, why:q.why||"", focusId:(focuses[(q.focus||1)-1]||{}).id || null, sel:false })));
-  S.eq = { items, from:eqSnap(T), t:nowT() };
+  S.eq = { items, from:eqSnap(), t:nowT() };
   eui.confirm = false; persist(); renderSide(); renderMain();
   const el = $("#eqSec"); if (el) el.scrollIntoView({ block:"start", behavior:"smooth" });
 }
@@ -3755,17 +3788,17 @@ function eqItemHtml(q, n){
     <button class="ce-del" type="button" data-eqdel="${q.id}" aria-label="질문 지우기">×</button></li>`;
 }
 function eqHtml(){
-  const S = sel(), T = S.kt, E = S.eq;
+  const S = sel(), E = S.eq;
   stripPerspHead(E, "text");
-  const chosen = T ? T.items.filter(x=>x.sel) : [];
+  const chosen = krFocuses();
   const btn = chosen.length ? `<button class="btn ${E?'':'primary'} sm" type="button" data-eqact="run">${sparkSvg}${E?"다시 만들기":"핵심 질문 만들기"}</button>` : "";
-  const head = `<div class="block-head"><h3><span class="step-n">④</span>핵심 질문 도출</h3><span class="kq-q">학생들이 이 초점을 스스로 탐구하게 하려면 어떤 질문을 던져야 할까?</span><span class="sp"></span>${btn}</div>`;
-  if (!chosen.length) return `<section id="eqSec">${head}<p class="ce-head-note">③에서 깊이 다룰 탐구 초점을 하나 이상 고르면, 학생이 스스로 탐구하도록 던질 핵심 질문을 만들어 드려요.</p></section>`;
-  if (!E) return `<section id="eqSec">${head}<p class="ce-head-note">고른 탐구 초점 ${chosen.length}개마다 사실적 질문 1개, 개념적 질문과 논쟁적 질문을 각각 1~2개 만들고, 질문마다 가장 어울리는 범위(나·공동체·사회)를 붙여요. 전체를 꿰는 대표 핵심 질문도 하나 만들어요. AI 연결 전이라 지금은 예시 틀로 만들어요.</p></section>`;
-  const stale = E.from !== eqSnap(T);
+  const head = `<div class="block-head"><h3><span class="step-n">③</span>핵심 질문 도출</h3><span class="kq-q">정한 순서대로 관계를 탐구하게 하려면 어떤 질문을 던져야 할까?</span><span class="sp"></span>${btn}</div>`;
+  if (!chosen.length) return `<section id="eqSec">${head}<p class="ce-head-note">②에서 탐구할 관계의 순서를 정하면, 그 순서대로 학생이 스스로 탐구하도록 던질 핵심 질문을 만들어 드려요.</p></section>`;
+  if (!E) return `<section id="eqSec">${head}<p class="ce-head-note">정한 순서의 관계 ${chosen.length}개를 1번부터 차례로, 관계마다 사실적 질문 1개, 개념적 질문과 논쟁적 질문을 각각 1~2개 만들고, 질문마다 가장 어울리는 범위(나·공동체·사회)를 붙여요. 전체를 꿰는 대표 핵심 질문도 하나 만들어요. AI 연결 전이라 지금은 예시 틀로 만들어요.</p></section>`;
+  const stale = E.from !== eqSnap();
   let status = "";
   if (eui.confirm) status = `<div class="ce-status warn">질문을 새로 만들어요. 고른 질문과 고친 내용, 직접 더한 질문도 사라져요.<span class="sp"></span><button class="mini" type="button" data-eqact="go">새로 만들기</button><button class="mini" type="button" data-eqact="cancel">취소</button></div>`;
-  else if (stale) status = `<div class="ce-status warn">질문을 만든 뒤에 고른 탐구 초점이 바뀌었어요. 필요하면 다시 만드세요.</div>`;
+  else if (stale) status = `<div class="ce-status warn">질문을 만든 뒤에 ②의 관계나 탐구 순서가 바뀌었어요. 바뀐 순서대로 질문을 만들려면 '다시 만들기'를 눌러 주세요.</div>`;
   const big = E.items.filter(q=>q.kind==="big");
   const groups = chosen.map((f,i)=>{ const qs = E.items.filter(q=>q.focusId===f.id);
     return `<div class="eq-group"><div class="eq-gh"><span class="eq-gn">${i+1}</span>${f.perspective?`<span class="kt-persp">${esc(f.perspective)}의 관점</span>`:""}<span class="eq-gt">${esc(f.title)}</span></div>
@@ -3806,7 +3839,6 @@ function step4Html(a){
     ${notDone}${kStale}${idea}${tags}
   </section>
   ${relationsHtml(ri, K)}
-  ${topicsHtml()}
   ${eqHtml()}`;
 }
 /* =====================================================================
@@ -5089,7 +5121,17 @@ document.addEventListener("click", e=>{
   const kra = e.target.closest("[data-kract]");
   if (kra){ runRelations(); return; }
   const krd = e.target.closest("[data-krdel]");
-  if (krd){ const R = sel().kr; R.rels = R.rels.filter(x=>x.id!==krd.dataset.krdel); persist(); renderSide(); renderMain(); return; }
+  if (krd){ const R = sel().kr; R.rels = R.rels.filter(x=>x.id!==krd.dataset.krdel); krOrder(R); persist(); renderSide(); renderMain(); return; }
+  const kro = e.target.closest("[data-kro]");
+  if (kro){ const R = sel().kr, act = kro.dataset.kro, id = kro.dataset.id; krOrder(R); const o = R.order, i = o.indexOf(id);
+    if (act==="add" && i<0) o.push(id);
+    else if (act==="out" && i>=0) o.splice(i,1);
+    else if (act==="up" && i>0) [o[i-1], o[i]] = [o[i], o[i-1]];
+    else if (act==="down" && i>=0 && i<o.length-1) [o[i+1], o[i]] = [o[i], o[i+1]];
+    else if (act==="all") R.rels.forEach(r=>{ if (!o.includes(r.id)) o.push(r.id); });
+    else if (act==="clear") o.length = 0;
+    krOrder(R); persist(); renderSide(); renderMain();
+    const el = id && document.querySelector(`[data-kro="${act}"][data-id="${id}"]`); if (el && !el.disabled) el.focus({ preventScroll:true }); return; }
   const kc = e.target.closest("[data-kq]");
   if (kc){ const K = sel().kq, id = kc.dataset.kq;
     K.picked = K.picked.includes(id) ? K.picked.filter(x=>x!==id) : K.list.filter(c=>c.id===id || K.picked.includes(c.id)).map(c=>c.id);
@@ -5264,6 +5306,17 @@ document.addEventListener("input", e=>{
     if (it){ it.text = t.textContent; it.edited = true; persist(); }
   }
 });
+/* ② 관계 순서: 끌어서 옮기기 */
+document.addEventListener("dragstart", e=>{ const li = e.target.closest && e.target.closest("[data-krdrag]"); if (!li) return;
+  if (e.target.closest("[contenteditable]")){ e.preventDefault(); return; }
+  kdrag.id = li.dataset.krdrag; e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", kdrag.id); } catch(_){} });
+document.addEventListener("dragover", e=>{ const li = e.target.closest && e.target.closest("[data-krdrag]"); if (!li || !kdrag.id) return;
+  e.preventDefault(); document.querySelectorAll(".kr-rel.drag-over").forEach(x=>x!==li && x.classList.remove("drag-over")); li.classList.add("drag-over"); });
+document.addEventListener("drop", e=>{ const li = e.target.closest && e.target.closest("[data-krdrag]"); if (!li || !kdrag.id) return;
+  e.preventDefault(); const R = sel().kr, o = krOrder(R) && R.order, from = o.indexOf(kdrag.id), to = o.indexOf(li.dataset.krdrag);
+  if (from>=0 && to>=0 && from!==to){ o.splice(from,1); o.splice(to,0,kdrag.id); krOrder(R); persist(); renderSide(); renderMain(); }
+  kdrag.id = null; });
+document.addEventListener("dragend", ()=>{ kdrag.id = null; document.querySelectorAll(".kr-rel.drag-over").forEach(x=>x.classList.remove("drag-over")); });
 document.addEventListener("focusout", e=>{
   const t = e.target;
   if (t.dataset && t.dataset.ans){ renderMain(); return; }
